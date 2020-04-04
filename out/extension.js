@@ -35,7 +35,7 @@ function activate(context) {
                         parsedFileContent += h.class ? `\n\t${parse_1.formatMethodsignature(h.methods[i], h.class)}\n\t{\n\t\t\n\t}\n` : `\n\t${parse_1.formatMethodsignature(h.methods[i])}\n\t{\n\t\t\n\t}\n`;
                     }
                     else {
-                        parsedFileContent += h.class ? `\n${parse_1.formatMethodsignature(h.methods[i], h.class)}\n` : `\n${parse_1.formatMethodsignature(h.methods[i])}\n`;
+                        parsedFileContent += h.class ? `\n${parse_1.formatMethodsignature(h.methods[i], h.class)}\n{\n\t\n}\n` : `\n${parse_1.formatMethodsignature(h.methods[i])}\n{\n\t\n}\n`;
                     }
                 }
                 parsedFileContent += h.namespace ? '}' : '';
