@@ -22,18 +22,20 @@ export function parse(fileContent: string): header {
     let temp: string;
     for(let i = 0; i < arrayFileContent.length; i++){
         temp = arrayFileContent[i].trimLeft();
-        if(lineIsInclude(temp)){
-            h.includes.push(temp);
-        }
-        if(lineIsMethodSignature(temp)){
-            h.methods.push(temp.split(';')[0]);
-        }
-        if(lineIsClass(temp)){
-            h.class = temp.split(' ')[1].trim();
-        }
-        if(lineIsNamespace(temp)){
-            temp += temp.includes('{') ? '' : '{';
-            h.namespace = temp;
+        if(!lineIsComment(temp)){
+            if(lineIsInclude(temp)){
+                h.includes.push(temp);
+            }
+            if(lineIsMethodSignature(temp)){
+                h.methods.push(temp.split(';')[0]);
+            }
+            if(lineIsClass(temp)){
+                h.class = temp.split(' ')[1].trim();
+            }
+            if(lineIsNamespace(temp)){
+                temp += temp.includes('{') ? '' : '{';
+                h.namespace = temp;
+            }
         }
     }
 
@@ -56,8 +58,12 @@ export function formatMethodsignature(methodSignature: string, className?: strin
 		for(let i = 0; i <= arrayMethodSignature2.length - 2; i++){
 			formattedMethodSignature += arrayMethodSignature2[i] + ' ';
 		}
-	}
-	formattedMethodSignature += className ? `${className}::${arrayMethodSignature2[arrayMethodSignature2.length - 1] + '(' + arrayMethodSignature[arrayMethodSignature.length - 1]}` : `${methodSignature}`;
+    }
+    if(className){
+        formattedMethodSignature += `${className}::${arrayMethodSignature2[arrayMethodSignature2.length - 1] + '(' + arrayMethodSignature[arrayMethodSignature.length - 1]}`;
+    }else{
+        formattedMethodSignature = methodSignature;
+    }
 
 	return formattedMethodSignature;
 }
@@ -80,4 +86,8 @@ function lineIsClass(line: string): boolean {
 //C++ only
 function lineIsNamespace(line: string): boolean {
     return line.startsWith('namespace');
+}
+
+function lineIsComment(line: string): boolean {
+    return line.startsWith('/*') || line.startsWith('//') || line.startsWith('*');
 }

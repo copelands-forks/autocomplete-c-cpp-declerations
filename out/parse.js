@@ -24,18 +24,20 @@ function parse(fileContent) {
     let temp;
     for (let i = 0; i < arrayFileContent.length; i++) {
         temp = arrayFileContent[i].trimLeft();
-        if (lineIsInclude(temp)) {
-            h.includes.push(temp);
-        }
-        if (lineIsMethodSignature(temp)) {
-            h.methods.push(temp.split(';')[0]);
-        }
-        if (lineIsClass(temp)) {
-            h.class = temp.split(' ')[1].trim();
-        }
-        if (lineIsNamespace(temp)) {
-            temp += temp.includes('{') ? '' : '{';
-            h.namespace = temp;
+        if (!lineIsComment(temp)) {
+            if (lineIsInclude(temp)) {
+                h.includes.push(temp);
+            }
+            if (lineIsMethodSignature(temp)) {
+                h.methods.push(temp.split(';')[0]);
+            }
+            if (lineIsClass(temp)) {
+                h.class = temp.split(' ')[1].trim();
+            }
+            if (lineIsNamespace(temp)) {
+                temp += temp.includes('{') ? '' : '{';
+                h.namespace = temp;
+            }
         }
     }
     return h;
@@ -57,7 +59,12 @@ function formatMethodsignature(methodSignature, className) {
             formattedMethodSignature += arrayMethodSignature2[i] + ' ';
         }
     }
-    formattedMethodSignature += className ? `${className}::${arrayMethodSignature2[arrayMethodSignature2.length - 1] + '(' + arrayMethodSignature[arrayMethodSignature.length - 1]}` : `${methodSignature}`;
+    if (className) {
+        formattedMethodSignature += `${className}::${arrayMethodSignature2[arrayMethodSignature2.length - 1] + '(' + arrayMethodSignature[arrayMethodSignature.length - 1]}`;
+    }
+    else {
+        formattedMethodSignature = methodSignature;
+    }
     return formattedMethodSignature;
 }
 exports.formatMethodsignature = formatMethodsignature;
@@ -76,5 +83,8 @@ function lineIsClass(line) {
 //C++ only
 function lineIsNamespace(line) {
     return line.startsWith('namespace');
+}
+function lineIsComment(line) {
+    return line.startsWith('/*') || line.startsWith('//') || line.startsWith('*');
 }
 //# sourceMappingURL=parse.js.map
