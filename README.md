@@ -7,7 +7,7 @@ This extension will write the implementation of your C/C++ code without make you
 the extension will generate the implementation file, if you run the command "write implementation file", or will generate the implementation for the functions at the end of the file, if you run the command "Parse main file"
 
 ### Write implementation file:
-!(images/feature_write_impl_file.mp4)
+![Write implementation file](images/feature_write_impl_file.mp4)
 
 > The command will read the header file and will print in a file that will prompt side by side the header file in the editor.
 
