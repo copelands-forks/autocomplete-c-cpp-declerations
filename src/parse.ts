@@ -42,6 +42,33 @@ export function parse(fileContent: string): header {
     return h;
 }
 
+export function parseMain(fileContent: string): header {
+    let h: header = new header();
+    let arrayFileContent = fileContent.split('\n');
+    let temp: string;
+    for(let i = 0; i < arrayFileContent.length; i++){
+        temp = arrayFileContent[i].trimLeft();
+        if(!lineIsMain(temp)){
+            if(!lineIsComment(temp)){
+                if(lineIsMethodSignature(temp)){
+                    h.methods.push(temp.split(';')[0]);
+                }
+                if(lineIsClass(temp)){
+                    h.class = temp.split(' ')[1].trim();
+                }
+                if(lineIsNamespace(temp)){
+                    temp += temp.includes('{') ? '' : '{';
+                    h.namespace = temp;
+                }
+            }
+        }else{
+            i = arrayFileContent.length;
+        }
+    }
+
+    return h;
+}
+
 /**
  * 
  * @param methodSignature the string contains the method signature to be parsed
@@ -88,6 +115,12 @@ function lineIsNamespace(line: string): boolean {
     return line.startsWith('namespace');
 }
 
+//common to C and C++
 function lineIsComment(line: string): boolean {
     return line.startsWith('/*') || line.startsWith('//') || line.startsWith('*');
+}
+
+//common to C and C++
+function lineIsMain(line: string): boolean {
+    return line.includes('main');
 }
