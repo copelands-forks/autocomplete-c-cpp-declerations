@@ -17,7 +17,9 @@ Open the command Palette (`ctrl` + `shift` + `P`) and select one of the followin
 with a normal C header file
 
 ![with C header file](images/Write_impl_C_file.gif)
+
 with a C++ header file that contains a class
+
 ![with C++ class header file](images/Write_impl_CPP_file.gif)
 
 > The command will read the header file and will print in a file that will prompt side by side the header file in the editor (see the column number setting in the settings).
