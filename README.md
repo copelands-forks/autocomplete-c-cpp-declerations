@@ -13,7 +13,9 @@ Open the command Palette (`ctrl` + `shift` + `P`) and select one of the followin
 * `Parse Main File`
 
 ### Write implementation file:
+
 with a normal C header file
+
 ![with C header file](images/Write_impl_C_file.gif)
 with a C++ header file that contains a class
 ![with C++ class header file](images/Write_impl_CPP_file.gif)
@@ -21,7 +23,9 @@ with a C++ header file that contains a class
 > The command will read the header file and will print in a file that will prompt side by side the header file in the editor (see the column number setting in the settings).
 
 ### Parse main file:
+
 whith the main file
+
 ![with the main file](images/parse_main_file.gif)
 > The command will read the focused file in the editor and will append the methods signatures at the end of the file.
 
