@@ -60,10 +60,9 @@ function parsemainfile() {
     if (editor) {
         let document = editor.document;
         let fileName = document.fileName.split(process.platform === 'win32' ? '\\' : '/')[document.fileName.split(process.platform === 'win32' ? '\\' : '/').length - 1];
-        if (document.fileName.endsWith('.h')) {
+        if (document.fileName.endsWith('.c') || document.fileName.endsWith('cpp')) {
             let text = document.getText();
             let h = new parse_1.header();
-            let language = document.languageId;
             h = parse_1.parseMain(text);
             let parsedFileContent = '';
             parsedFileContent += h.namespace ? `\n${h.namespace}` : '';

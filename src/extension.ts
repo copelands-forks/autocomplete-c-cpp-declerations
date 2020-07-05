@@ -54,10 +54,9 @@ function parsemainfile(): void {
 	if(editor){
 		let document = editor.document;
 		let fileName = document.fileName.split(process.platform === 'win32' ? '\\' : '/')[document.fileName.split(process.platform === 'win32' ? '\\' : '/').length - 1];
-		if(document.fileName.endsWith('.h')){
+		if(document.fileName.endsWith('.c') || document.fileName.endsWith('cpp')){
 			let text = document.getText();
 			let h: header = new header();
-			let language: string = document.languageId;
 
 			h = parseMain(text);
 
