@@ -6,45 +6,33 @@ This extension will write the implementation of your C/C++ code without make you
 
 the extension will generate the implementation file, if you run the command "write implementation file", or will generate the implementation for the functions at the end of the file, if you run the command "Parse main file"
 
+## Usage
+Open the command Palette (`ctrl` + `shift` + `P`) and select one of the following commands:
+
+* `Wirte Implementation File`
+* `Parse Main File`
+
 ### Write implementation file:
 with a normal C header file
-![with C header file](images/Write_implementation_C_file.gif)
+![with C header file](images/Write_impl_C_file.gif)
 with a C++ header file that contains a class
-![with C++ class header file](images/Write_implementation_CPP_file.gif)
+![with C++ class header file](images/Write_impl_CPP_file.gif)
 
-> The command will read the header file and will print in a file that will prompt side by side the header file in the editor.
+> The command will read the header file and will print in a file that will prompt side by side the header file in the editor (see the column number setting in the settings).
 
 ### Parse main file:
-![feature Y](images/parse_main_file.gif)
+whith the main file
+![with the main file](images/parse_main_file.gif)
 > The command will read the focused file in the editor and will append the methods signatures at the end of the file.
-
-## commands
-
-* Wirite implementation file
-* Parse main file
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+this extension can be custimizabile with the some settings
 
 For example:
 
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-### 1.0.0
-
-Initial release of the extension!!!
-
------------------------------------------------------------------------------------------------------------
+* `autocomplete-c-cpp-files.indentStyle`: choose the indentation style between K&R (default) and Allman
+* `autocomplete-c-cpp-files.columnNumber`: choose the column to open the implementation file, default is 2 (will open the file side by side the header file in the editor) 
 
 ## Known Issues
 
@@ -55,3 +43,11 @@ here is a list of all the known issues I am working on, if you find a new issue 
 
 * if there is a class in the file the extension will implements the functions with ClassName::FunctionNAme with all of them
 ![class issue](images/ClassIssue.PNG)
+
+## Release Notes
+
+### 1.0.0
+
+Initial release of the extension!!!
+
+-----------------------------------------------------------------------------------------------------------
