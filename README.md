@@ -7,12 +7,15 @@ This extension will write the implementation of your C/C++ code without make you
 the extension will generate the implementation file, if you run the command "write implementation file", or will generate the implementation for the functions at the end of the file, if you run the command "Parse main file"
 
 ### Write implementation file:
-![Write implementation file](images/feature_write_impl_file.mp4)
+with a normal C header file
+![with C header file](images/Write_implementation_C_file.gif)
+with a C++ header file that contains a class
+![with C++ class header file](images/Write_implementation_CPP_file.gif)
 
 > The command will read the header file and will print in a file that will prompt side by side the header file in the editor.
 
 ### Parse main file:
-\!\[feature Y\]\(images/feature-y.png\)
+![feature Y](images/parse_main_file.gif)
 > The command will read the focused file in the editor and will append the methods signatures at the end of the file.
 
 ## commands
@@ -37,25 +40,18 @@ Calling out known issues can help limit users opening duplicate issues against y
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 1.0.0
 
 Initial release of the extension!!!
 
 -----------------------------------------------------------------------------------------------------------
 
-## Working with Markdown
+## Known Issues
 
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+here is a list of all the known issues I am working on, if you find a new issue please report it [here](https://github.com/SteveSevetS/autocomplete-c-cpp-files/issues)
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
+* if a line is a method signature but it is in a comment block and doesen't start with /* or * or // the extension will treat that line as a method signature
+![comment issue](images/CommentIssue.PNG)
 
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+* if there is a class in the file the extension will implements the functions with ClassName::FunctionNAme with all of them
+![class issue](images/ClassIssue.PNG)
