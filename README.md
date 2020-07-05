@@ -37,7 +37,7 @@ this extension can be custimizabile with the some settings
 
 For example:
 
-* `autocomplete-c-cpp-files.indentStyle`: choose the indentation style between K&R (default) and Allman
+* `autocomplete-c-cpp-files.indentStyle`: choose the indentation style between K&R (default) and Allman click [here](https://en.wikipedia.org/wiki/Indentation_style#Brace_placement_in_compound_statements) for more information
 * `autocomplete-c-cpp-files.columnNumber`: choose the column to open the implementation file, default is 2 (will open the file side by side the header file in the editor) 
 
 ## Known Issues
