@@ -1,6 +1,6 @@
 # Autocomplete C/C++ files
 
-This extension will write the signatures of your C/C++ code without make you copy and paste like an idiot
+This extension will write the implementation of your C/C++ code without make you copy and paste like an idiot
 
 ## Features
 
