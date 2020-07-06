@@ -44,11 +44,9 @@ function writeimplfile() {
             }
             parsedFileContent += h.namespace ? '}' : '';
             openImplementationFile(parsedFileContent, language);
-            deactivate();
         }
         else {
             vscode_1.window.showWarningMessage('file type not supported');
-            deactivate();
         }
     }
     else {
@@ -80,7 +78,6 @@ function parsemainfile() {
         }
         else {
             vscode_1.window.showWarningMessage('file type not supported');
-            deactivate();
         }
     }
     else {

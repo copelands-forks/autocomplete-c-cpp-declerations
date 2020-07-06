@@ -1,4 +1,4 @@
-import { ExtensionContext, commands, window, workspace, Selection, Position } from 'vscode'; //import vscode classes and workspace
+import { ExtensionContext, commands, window, workspace, Position } from 'vscode'; //import vscode classes and workspace
 import { header, parse, parseMain, formatMethodsignature } from './parse'; //import parse functions and class
 
 // this method is called when your extension is activated
@@ -39,10 +39,8 @@ function writeimplfile(): void {
 			parsedFileContent += h.namespace ? '}' : '';
 
 			openImplementationFile(parsedFileContent, language);
-			deactivate();
 		}else{
 			window.showWarningMessage('file type not supported');
-			deactivate();
 		}
 	}else{
 		window.showWarningMessage('no open document, please open one and run the command again');
@@ -76,7 +74,6 @@ function parsemainfile(): void {
 			deactivate();
 		}else{
 			window.showWarningMessage('file type not supported');
-			deactivate();
 		}
 	}else{
 		window.showWarningMessage('no open document, please open one and run the command again');

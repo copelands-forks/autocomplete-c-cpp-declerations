@@ -29,6 +29,11 @@
 		"configuration": {
 			"title": "Autocomplete C/C++ files",
 			"properties": {
+				"autocomplete-c-cpp-files.columnNumber": {
+					"type": "number",
+					"default": 2,
+					"description": "choose the column to open the file"
+				},
 				"autocomplete-c-cpp-files.indentStyle": {
 					"type": "string",
 					"enum": [
@@ -37,14 +42,23 @@
 					],
 					"default": "K&R",
 					"description": "choose the indentation style"
-				},
-				"autocomplete-c-cpp-files.columnNumber": {
-					"type": "number",
-					"default": 2,
-					"description": "choose the column to open the file"
 				}
 			}
-		}
+		},
+		"keybindings": [
+			{
+				"command": "extension.writeimplfile",
+				"key": "ctrl+shift+j",
+				"mac": "cmd+shift+j",
+				"when": "editorTextFocus"
+			},
+			{
+				"command": "extension.parsemainfile",
+				"key": "ctrl+shift+l",
+				"mac": "cmd+shift+l",
+				"when": "editorTextFocus"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

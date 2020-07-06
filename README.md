@@ -1,16 +1,16 @@
 # Autocomplete C/C++ files
 
-This extension will write the implementation of your C/C++ code without make you copy and paste like an idiot
+This extension will write the implementation of your C/C++ code without make you copy and paste like an idiot.
 
 ## Features
 
-the extension will generate the implementation file, if you run the command "write implementation file", or will generate the implementation for the functions at the end of the file, if you run the command "Parse main file"
+the extension will generate the implementation file, if you run the command "write implementation file", or will generate the implementation for the functions at the end of the file, if you run the command "Parse main file" comments are skipped.
 
 ## Usage
-Open the command Palette (`ctrl` + `shift` + `P`) and select one of the following commands:
+Open the command Palette (`ctrl + shift + P`) and select one of the following commands:
 
-* `Wirte Implementation File`
-* `Parse Main File`
+* `Wirte Implementation File` also accesibile via `ctrl + shift + J`
+* `Parse Main File` also accesibile via `ctrl + shift + L`
 
 ### Write implementation file:
 
@@ -22,7 +22,7 @@ with a C++ header file that contains a class
 
 ![with C++ class header file](images/Write_impl_CPP_file.gif)
 
-> The command will read the header file and will print in a file that will prompt side by side the header file in the editor (see the column number setting in the settings).
+> The command will read the header file and will print in a file that will prompt side by side the header file in the editor (see the column number setting in the settings menu).
 
 ### Parse main file:
 
@@ -33,7 +33,7 @@ whith the main file
 
 ## Extension Settings
 
-this extension can be custimizabile with the some settings
+this extension can be custimizabile with some settings
 
 For example:
 
@@ -42,12 +42,18 @@ For example:
 
 ## Known Issues
 
-here is a list of all the known issues I am working on, if you find a new issue please report it [here](https://github.com/SteveSevetS/autocomplete-c-cpp-files/issues)
+here is a list of all the known issues I am working on, if you find a new issue please report it [here](https://github.com/SteveSevetS/autocomplete-c-cpp-files/issues).
 
-* if a line is a method signature but it is in a comment block and doesen't start with /* or * or // the extension will treat that line as a method signature
+* Comment Issue: If there is a line that ends with ); in a comment block but the lines in the block doesen't start with a * the parser will include that line in the implementation too.
 ![comment issue](images/CommentIssue.PNG)
+> Tip: For now I reccomend you use the standard comment block wich have a * at the start of every line.
+```C
+/**
+  * use this type of comment block
+  */
+``` 
 
-* if there is a class in the file the extension will implements the functions with ClassName::FunctionNAme with all of them
+* Class Issue: If there is a file wich contains some functions not related to any class and a class, the parser will think that all the functions are class members.
 ![class issue](images/ClassIssue.PNG)
 
 ## Release Notes
