@@ -1,5 +1,14 @@
-import { ExtensionContext, commands, window, workspace, Position } from 'vscode'; //import vscode classes and workspace
+import { ExtensionContext, commands, window, workspace, Position, ViewColumn } from 'vscode'; //import vscode classes and workspace
 import { header, parse, parseMain, formatMethodsignature } from './parse'; //import parse functions and class
+
+//settings
+var indentStyle: string | undefined;
+var columnNumber: ViewColumn | undefined;
+
+function readSettings(): void {
+	indentStyle = workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
+	columnNumber = workspace.getConfiguration('autocomplete-c-cpp-files').get('columnNumber');
+}
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -11,6 +20,7 @@ export function activate(context: ExtensionContext) {
 }
 
 function writeimplfile(): void {
+	readSettings();
 	let editor = window.activeTextEditor;
 	if(editor){
 		let document = editor.document;
@@ -48,10 +58,10 @@ function writeimplfile(): void {
 }
 
 function parsemainfile(): void {
+	readSettings();
 	let editor = window.activeTextEditor;
 	if(editor){
 		let document = editor.document;
-		let fileName = document.fileName.split(process.platform === 'win32' ? '\\' : '/')[document.fileName.split(process.platform === 'win32' ? '\\' : '/').length - 1];
 		if(document.fileName.endsWith('.c') || document.fileName.endsWith('cpp')){
 			let text = document.getText();
 			let h: header = new header();
@@ -82,7 +92,7 @@ function parsemainfile(): void {
 
 async function openImplementationFile(fileContent: string, fileLanguage: string): Promise<void> {
 	let doc = await workspace.openTextDocument({ language: fileLanguage, content: fileContent });
-	window.showTextDocument(doc, 2);
+	window.showTextDocument(doc, columnNumber);
 }
 
 // this method is called when your extension is deactivated

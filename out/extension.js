@@ -10,6 +10,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const vscode_1 = require("vscode"); //import vscode classes and workspace
 const parse_1 = require("./parse"); //import parse functions and class
+//settings
+var indentStyle;
+var columnNumber;
+function readSettings() {
+    indentStyle = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
+    columnNumber = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('columnNumber');
+}
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
@@ -19,6 +26,7 @@ function activate(context) {
 }
 exports.activate = activate;
 function writeimplfile() {
+    readSettings();
     let editor = vscode_1.window.activeTextEditor;
     if (editor) {
         let document = editor.document;
@@ -54,10 +62,10 @@ function writeimplfile() {
     }
 }
 function parsemainfile() {
+    readSettings();
     let editor = vscode_1.window.activeTextEditor;
     if (editor) {
         let document = editor.document;
-        let fileName = document.fileName.split(process.platform === 'win32' ? '\\' : '/')[document.fileName.split(process.platform === 'win32' ? '\\' : '/').length - 1];
         if (document.fileName.endsWith('.c') || document.fileName.endsWith('cpp')) {
             let text = document.getText();
             let h = new parse_1.header();
@@ -87,7 +95,7 @@ function parsemainfile() {
 function openImplementationFile(fileContent, fileLanguage) {
     return __awaiter(this, void 0, void 0, function* () {
         let doc = yield vscode_1.workspace.openTextDocument({ language: fileLanguage, content: fileContent });
-        vscode_1.window.showTextDocument(doc, 2);
+        vscode_1.window.showTextDocument(doc, columnNumber);
     });
 }
 // this method is called when your extension is deactivated
