@@ -16,11 +16,11 @@ Open the command Palette (`ctrl + shift + P`) and select one of the following co
 
 with a normal C header file
 
-![with C header file](images/Write_impl_C_file.gif)
+![with C header file](https://github.com/SteveSevetS/autocomplete-c-cpp-files/blob/master/images/Write_impl_C_file.gif?raw=true)
 
 with a C++ header file that contains a class
 
-![with C++ class header file](images/Write_impl_CPP_file.gif)
+![with C++ class header file](https://github.com/SteveSevetS/autocomplete-c-cpp-files/blob/master/images/Write_impl_CPP_file.gif?raw=true)
 
 > The command will read the header file and will print in a file that will prompt side by side the header file in the editor (see the column number setting in the settings menu).
 
@@ -28,7 +28,7 @@ with a C++ header file that contains a class
 
 whith the main file
 
-![with the main file](images/parse_main_file.gif)
+![with the main file](https://github.com/SteveSevetS/autocomplete-c-cpp-files/blob/master/images/parse_main_file.gif?raw=true)
 > The command will read the focused file in the editor and will append the methods signatures at the end of the file.
 
 ## Extension Settings
@@ -46,9 +46,9 @@ Right now there are no issues, if you find one please report it [here](https://g
 
 ## Release Notes
 
-### 1.0.0
+### 0.0.1
 
-Initial release of the extension!!!
+Initial release
 
 -----------------------------------------------------------------------------------------------------------
 
