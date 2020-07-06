@@ -42,19 +42,7 @@ For example:
 
 ## Known Issues
 
-here is a list of all the known issues I am working on, if you find a new issue please report it [here](https://github.com/SteveSevetS/autocomplete-c-cpp-files/issues).
-
-* Comment Issue: If there is a line that ends with ); in a comment block but the lines in the block doesen't start with a * the parser will include that line in the implementation too.
-![comment issue](images/CommentIssue.PNG)
-> Tip: For now I reccomend you use the standard comment block wich have a * at the start of every line.
-```C
-/**
-  * use this type of comment block
-  */
-``` 
-
-* Class Issue: If there is a file wich contains some functions not related to any class and a class, the parser will think that all the functions are class members.
-![class issue](images/ClassIssue.PNG)
+Right now there are no issues, if you find one please report it [here](https://github.com/SteveSevetS/autocomplete-c-cpp-files/issues).
 
 ## Release Notes
 
@@ -63,3 +51,9 @@ here is a list of all the known issues I am working on, if you find a new issue 
 Initial release of the extension!!!
 
 -----------------------------------------------------------------------------------------------------------
+
+# For developers
+
+Feel free to contribute to this project by submitting a pull request [here](https://github.com/SteveSevetS/autocomplete-c-cpp-files/pulls)
+
+in the `test_files/` folders you find some files you can use while testing

@@ -44,10 +44,10 @@ function writeimplfile() {
             parsedFileContent += h.namespace ? `\n${h.namespace}` : '';
             for (let i = 0; i < h.methods.length; i++) {
                 if (h.namespace) {
-                    parsedFileContent += h.class ? `\n\t${parse_1.formatMethodsignature(h.methods[i], h.class)}\n\t{\n\t\t\n\t}\n` : `\n\t${parse_1.formatMethodsignature(h.methods[i])}\n\t{\n\t\t\n\t}\n`;
+                    parsedFileContent += parse_1.indent(h.methods[i], indentStyle, true);
                 }
                 else {
-                    parsedFileContent += h.class ? `\n${parse_1.formatMethodsignature(h.methods[i], h.class)}\n{\n\t\n}\n` : `\n${parse_1.formatMethodsignature(h.methods[i])}\n{\n\t\n}\n`;
+                    parsedFileContent += parse_1.indent(h.methods[i], indentStyle, false);
                 }
             }
             parsedFileContent += h.namespace ? '}' : '';
@@ -74,10 +74,10 @@ function parsemainfile() {
             parsedFileContent += h.namespace ? `\n${h.namespace}` : '';
             for (let i = 0; i < h.methods.length; i++) {
                 if (h.namespace) {
-                    parsedFileContent += h.class ? `\n\t${parse_1.formatMethodsignature(h.methods[i], h.class)}\n\t{\n\t\t\n\t}\n` : `\n\t${parse_1.formatMethodsignature(h.methods[i])}\n\t{\n\t\t\n\t}\n`;
+                    parsedFileContent += `\n\t${h.methods[i]}\n\t{\n\t\t\n\t}\n`;
                 }
                 else {
-                    parsedFileContent += h.class ? `\n${parse_1.formatMethodsignature(h.methods[i], h.class)}\n{\n\t\n}\n` : `\n${parse_1.formatMethodsignature(h.methods[i])}\n{\n\t\n}\n`;
+                    parsedFileContent += `\n${h.methods[i]}\n{\n\t\n}\n`;
                 }
             }
             parsedFileContent += h.namespace ? '}' : '';

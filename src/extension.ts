@@ -1,5 +1,5 @@
 import { ExtensionContext, commands, window, workspace, Position, ViewColumn } from 'vscode'; //import vscode classes and workspace
-import { header, parse, formatMethodsignature } from './parse'; //import parse functions and class
+import { header, parse, indent } from './parse'; //import parse functions and class
 
 //settings
 var indentStyle: string | undefined;
@@ -41,9 +41,9 @@ function writeimplfile(): void {
 			parsedFileContent += h.namespace ? `\n${h.namespace}` : '';
 			for(let i = 0; i < h.methods.length; i++){
 				if(h.namespace){
-					parsedFileContent += h.class ? `\n\t${formatMethodsignature(h.methods[i], h.class)}\n\t{\n\t\t\n\t}\n` : `\n\t${formatMethodsignature(h.methods[i])}\n\t{\n\t\t\n\t}\n`;
+					parsedFileContent += indent(h.methods[i], indentStyle, true);
 				}else{
-					parsedFileContent += h.class ? `\n${formatMethodsignature(h.methods[i], h.class)}\n{\n\t\n}\n` : `\n${formatMethodsignature(h.methods[i])}\n{\n\t\n}\n`;
+					parsedFileContent += indent(h.methods[i], indentStyle, false);
 				}
 			}
 			parsedFileContent += h.namespace ? '}' : '';
@@ -73,9 +73,9 @@ function parsemainfile(): void {
 			parsedFileContent += h.namespace ? `\n${h.namespace}` : '';
 			for(let i = 0; i < h.methods.length; i++){
 				if(h.namespace){
-					parsedFileContent += h.class ? `\n\t${formatMethodsignature(h.methods[i], h.class)}\n\t{\n\t\t\n\t}\n` : `\n\t${formatMethodsignature(h.methods[i])}\n\t{\n\t\t\n\t}\n`;
+					parsedFileContent += `\n\t${h.methods[i]}\n\t{\n\t\t\n\t}\n`;
 				}else{
-					parsedFileContent += h.class ? `\n${formatMethodsignature(h.methods[i], h.class)}\n{\n\t\n}\n` : `\n${formatMethodsignature(h.methods[i])}\n{\n\t\n}\n`;
+					parsedFileContent += `\n${h.methods[i]}\n{\n\t\n}\n`;
 				}
 			}
 			parsedFileContent += h.namespace ? '}' : '';

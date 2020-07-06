@@ -21,6 +21,7 @@ exports.header = header;
 function parse(fileContent) {
     let h = new header();
     let commentBlock = false;
+    let bracketsCount = 0; //cout the number of { } to dertermine if a class ends
     let arrayFileContent = fileContent.split('\n');
     let temp;
     for (let i = 0; i < arrayFileContent.length; i++) {
@@ -28,10 +29,16 @@ function parse(fileContent) {
         if (lineIsComment(temp)) {
             commentBlock = temp.startsWith('/*') ? true : commentBlock;
         }
-        if (commentBlock) {
+        if (commentBlock || lineIsComment(temp)) {
             commentBlock = temp.includes('*/') ? false : commentBlock;
         }
         else {
+            if (lineHasOpenBracket(temp)) {
+                bracketsCount++;
+            }
+            if (lineHasCloseBracket(temp)) {
+                bracketsCount--;
+            }
             if (lineIsMain(temp)) {
                 i = arrayFileContent.length;
             }
@@ -39,7 +46,12 @@ function parse(fileContent) {
                 h.includes.push(temp);
             }
             if (lineIsMethodSignature(temp)) {
-                h.methods.push(temp.split(';')[0]);
+                if (bracketsCount == 0 || (bracketsCount == 1 && h.namespace)) {
+                    h.methods.push(formatMethodsignature(temp.split(';')[0], undefined));
+                }
+                else {
+                    h.methods.push(formatMethodsignature(temp.split(';')[0], h.class));
+                }
             }
             if (lineIsClass(temp)) {
                 h.class = temp.split(' ')[1].trim();
@@ -77,29 +89,39 @@ function formatMethodsignature(methodSignature, className) {
     }
     return formattedMethodSignature;
 }
-exports.formatMethodsignature = formatMethodsignature;
-//common to C and C++
+function indent(methodSignature, indentationStyle, tab) {
+    let separator = ' ';
+    if (indentationStyle == "K&R")
+        separator = ' ';
+    if (indentationStyle == "Allman")
+        separator = '\n';
+    if (!indentationStyle)
+        separator = ' ';
+    return tab ? `\n\t${methodSignature}${separator}{\n\t\t\n\t}\n` : `\n${methodSignature}${separator}{\n\t\n}\n`;
+}
+exports.indent = indent;
 function lineIsInclude(line) {
     return line.startsWith('#include');
 }
-//common to C and C++
 function lineIsMethodSignature(line) {
     return line.includes(');');
 }
-//C++ only
 function lineIsClass(line) {
     return line.startsWith('class');
 }
-//C++ only
 function lineIsNamespace(line) {
     return line.startsWith('namespace');
 }
-//common to C and C++
 function lineIsComment(line) {
     return line.startsWith('/*') || line.startsWith('//') || line.startsWith('*');
 }
-//common to C and C++
 function lineIsMain(line) {
     return line.includes('main');
+}
+function lineHasOpenBracket(line) {
+    return line.includes('{');
+}
+function lineHasCloseBracket(line) {
+    return line.includes('}');
 }
 //# sourceMappingURL=parse.js.map

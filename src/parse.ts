@@ -19,6 +19,7 @@ export class header {
 export function parse(fileContent: string): header {
     let h: header = new header();
     let commentBlock: boolean = false;
+    let bracketsCount: number = 0; //cout the number of { } to dertermine if a class ends
     let arrayFileContent = fileContent.split('\n');
     let temp: string;
 
@@ -27,9 +28,15 @@ export function parse(fileContent: string): header {
         if(lineIsComment(temp)){
             commentBlock = temp.startsWith('/*') ? true : commentBlock;
         }
-        if(commentBlock){
+        if(commentBlock || lineIsComment(temp)){
             commentBlock = temp.includes('*/') ? false : commentBlock;
         }else{
+            if(lineHasOpenBracket(temp)){
+                bracketsCount++;
+            }
+            if(lineHasCloseBracket(temp)){
+                bracketsCount--;
+            }
             if(lineIsMain(temp)){
                 i = arrayFileContent.length;
             }
@@ -37,7 +44,11 @@ export function parse(fileContent: string): header {
                 h.includes.push(temp);
             }
             if(lineIsMethodSignature(temp)){
-                h.methods.push(temp.split(';')[0]);
+                if(bracketsCount == 0 || (bracketsCount == 1 && h.namespace)){
+                    h.methods.push(formatMethodsignature(temp.split(';')[0], undefined));
+                }else{
+                    h.methods.push(formatMethodsignature(temp.split(';')[0], h.class));
+                }
             }
             if(lineIsClass(temp)){
                 h.class = temp.split(' ')[1].trim();
@@ -59,7 +70,7 @@ export function parse(fileContent: string): header {
  * 
  * @returns return a string that contains the formatted method signature
  */
-export function formatMethodsignature(methodSignature: string, className?: string | undefined): string {
+function formatMethodsignature(methodSignature: string, className?: string | undefined): string {
 	let arrayMethodSignature: Array<string> = methodSignature.split('(');
 	let arrayMethodSignature2: Array<string> = arrayMethodSignature[0].split(' ');
 	let formattedMethodSignature: string = '';
@@ -78,32 +89,46 @@ export function formatMethodsignature(methodSignature: string, className?: strin
 	return formattedMethodSignature;
 }
 
-//common to C and C++
+export function indent(methodSignature: string, indentationStyle: string | undefined, tab: boolean): string {
+    let separator: string = ' ';
+    if(indentationStyle == "K&R")
+        separator = ' ';
+    if(indentationStyle == "Allman")
+        separator = '\n';
+    if(!indentationStyle)
+        separator = ' ';
+
+    return tab ? `\n\t${methodSignature}${separator}{\n\t\t\n\t}\n` : `\n${methodSignature}${separator}{\n\t\n}\n`
+}
+
 function lineIsInclude(line: string): boolean {
     return line.startsWith('#include');
 }
 
-//common to C and C++
 function lineIsMethodSignature(line: string): boolean {
     return line.includes(');');
 }
 
-//C++ only
 function lineIsClass(line: string): boolean {
     return line.startsWith('class');
 }
 
-//C++ only
 function lineIsNamespace(line: string): boolean {
     return line.startsWith('namespace');
 }
 
-//common to C and C++
 function lineIsComment(line: string): boolean {
     return line.startsWith('/*') || line.startsWith('//') || line.startsWith('*');
 }
 
-//common to C and C++
 function lineIsMain(line: string): boolean {
     return line.includes('main');
+}
+
+function lineHasOpenBracket(line: string){
+    return line.includes('{');
+}
+
+function lineHasCloseBracket(line: string){
+    return line.includes('}');
 }
