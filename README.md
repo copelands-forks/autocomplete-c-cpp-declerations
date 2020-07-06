@@ -56,4 +56,4 @@ Initial release of the extension!!!
 
 Feel free to contribute to this project by submitting a pull request [here](https://github.com/SteveSevetS/autocomplete-c-cpp-files/pulls)
 
-in the `test_files/` folders you find some files you can use while testing
+in the `test_files/` folder you find some files you can use while testing
