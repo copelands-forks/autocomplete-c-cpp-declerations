@@ -69,7 +69,7 @@ function parsemainfile() {
         if (document.fileName.endsWith('.c') || document.fileName.endsWith('cpp')) {
             let text = document.getText();
             let h = new parse_1.header();
-            h = parse_1.parseMain(text);
+            h = parse_1.parse(text);
             let parsedFileContent = '';
             parsedFileContent += h.namespace ? `\n${h.namespace}` : '';
             for (let i = 0; i < h.methods.length; i++) {

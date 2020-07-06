@@ -1,5 +1,5 @@
 import { ExtensionContext, commands, window, workspace, Position, ViewColumn } from 'vscode'; //import vscode classes and workspace
-import { header, parse, parseMain, formatMethodsignature } from './parse'; //import parse functions and class
+import { header, parse, formatMethodsignature } from './parse'; //import parse functions and class
 
 //settings
 var indentStyle: string | undefined;
@@ -66,7 +66,7 @@ function parsemainfile(): void {
 			let text = document.getText();
 			let h: header = new header();
 
-			h = parseMain(text);
+			h = parse(text);
 
 			let parsedFileContent: string = '';
 			

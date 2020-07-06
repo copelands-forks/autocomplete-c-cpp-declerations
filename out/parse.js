@@ -14,17 +14,27 @@ class header {
 }
 exports.header = header;
 /**
- * parses the C++ header file
+ * parses the C/C++ header file
  * @param fileContent string that contains the file content divided by \n
  * @returns return a header instance that contanis the file parsed file
  */
 function parse(fileContent) {
     let h = new header();
+    let commentBlock = false;
     let arrayFileContent = fileContent.split('\n');
     let temp;
     for (let i = 0; i < arrayFileContent.length; i++) {
         temp = arrayFileContent[i].trimLeft();
-        if (!lineIsComment(temp)) {
+        if (lineIsComment(temp)) {
+            commentBlock = temp.startsWith('/*') ? true : commentBlock;
+        }
+        if (commentBlock) {
+            commentBlock = temp.includes('*/') ? false : commentBlock;
+        }
+        else {
+            if (lineIsMain(temp)) {
+                i = arrayFileContent.length;
+            }
             if (lineIsInclude(temp)) {
                 h.includes.push(temp);
             }
@@ -43,33 +53,6 @@ function parse(fileContent) {
     return h;
 }
 exports.parse = parse;
-function parseMain(fileContent) {
-    let h = new header();
-    let arrayFileContent = fileContent.split('\n');
-    let temp;
-    for (let i = 0; i < arrayFileContent.length; i++) {
-        temp = arrayFileContent[i].trimLeft();
-        if (!lineIsMain(temp)) {
-            if (!lineIsComment(temp)) {
-                if (lineIsMethodSignature(temp)) {
-                    h.methods.push(temp.split(';')[0]);
-                }
-                if (lineIsClass(temp)) {
-                    h.class = temp.split(' ')[1].trim();
-                }
-                if (lineIsNamespace(temp)) {
-                    temp += temp.includes('{') ? '' : '{';
-                    h.namespace = temp;
-                }
-            }
-        }
-        else {
-            i = arrayFileContent.length;
-        }
-    }
-    return h;
-}
-exports.parseMain = parseMain;
 /**
  *
  * @param methodSignature the string contains the method signature to be parsed
