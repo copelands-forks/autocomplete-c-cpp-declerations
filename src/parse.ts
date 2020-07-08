@@ -75,12 +75,12 @@ function formatMethodsignature(methodSignature: string, className?: string | und
 	let arrayMethodSignature2: Array<string> = arrayMethodSignature[0].split(' ');
 	let formattedMethodSignature: string = '';
 
-	if(arrayMethodSignature2.length > 1){
-		for(let i = 0; i <= arrayMethodSignature2.length - 2; i++){
-			formattedMethodSignature += arrayMethodSignature2[i] + ' ';
-		}
-    }
     if(className){
+        if(arrayMethodSignature2.length > 1){
+            for(let i = 0; i <= arrayMethodSignature2.length - 2; i++){
+                formattedMethodSignature += arrayMethodSignature2[i] + ' ';
+            }
+        }
         formattedMethodSignature += `${className}::${arrayMethodSignature2[arrayMethodSignature2.length - 1] + '(' + arrayMethodSignature[arrayMethodSignature.length - 1]}`;
     }else{
         formattedMethodSignature = methodSignature;
@@ -98,7 +98,7 @@ export function indent(methodSignature: string, indentationStyle: string | undef
     if(!indentationStyle)
         separator = ' ';
 
-    return tab ? `\n\t${methodSignature}${separator}{\n\t\t\n\t}\n` : `\n${methodSignature}${separator}{\n\t\n}\n`
+    return tab ? `\n\t${methodSignature}${separator}\t{\n\t\t\n\t}\n` : `\n${methodSignature}${separator}{\n\t\n}\n`
 }
 
 function lineIsInclude(line: string): boolean {

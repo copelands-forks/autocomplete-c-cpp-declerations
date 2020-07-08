@@ -74,10 +74,10 @@ function parsemainfile() {
             parsedFileContent += h.namespace ? `\n${h.namespace}` : '';
             for (let i = 0; i < h.methods.length; i++) {
                 if (h.namespace) {
-                    parsedFileContent += `\n\t${h.methods[i]}\n\t{\n\t\t\n\t}\n`;
+                    parsedFileContent += parse_1.indent(h.methods[i], indentStyle, true);
                 }
                 else {
-                    parsedFileContent += `\n${h.methods[i]}\n{\n\t\n}\n`;
+                    parsedFileContent += parse_1.indent(h.methods[i], indentStyle, false);
                 }
             }
             parsedFileContent += h.namespace ? '}' : '';

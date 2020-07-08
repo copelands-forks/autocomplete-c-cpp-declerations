@@ -76,12 +76,12 @@ function formatMethodsignature(methodSignature, className) {
     let arrayMethodSignature = methodSignature.split('(');
     let arrayMethodSignature2 = arrayMethodSignature[0].split(' ');
     let formattedMethodSignature = '';
-    if (arrayMethodSignature2.length > 1) {
-        for (let i = 0; i <= arrayMethodSignature2.length - 2; i++) {
-            formattedMethodSignature += arrayMethodSignature2[i] + ' ';
-        }
-    }
     if (className) {
+        if (arrayMethodSignature2.length > 1) {
+            for (let i = 0; i <= arrayMethodSignature2.length - 2; i++) {
+                formattedMethodSignature += arrayMethodSignature2[i] + ' ';
+            }
+        }
         formattedMethodSignature += `${className}::${arrayMethodSignature2[arrayMethodSignature2.length - 1] + '(' + arrayMethodSignature[arrayMethodSignature.length - 1]}`;
     }
     else {
@@ -97,7 +97,7 @@ function indent(methodSignature, indentationStyle, tab) {
         separator = '\n';
     if (!indentationStyle)
         separator = ' ';
-    return tab ? `\n\t${methodSignature}${separator}{\n\t\t\n\t}\n` : `\n${methodSignature}${separator}{\n\t\n}\n`;
+    return tab ? `\n\t${methodSignature}${separator}\t{\n\t\t\n\t}\n` : `\n${methodSignature}${separator}{\n\t\n}\n`;
 }
 exports.indent = indent;
 function lineIsInclude(line) {
