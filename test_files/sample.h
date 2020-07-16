@@ -14,7 +14,7 @@ namespace sas
     class MyClass {
         public:
             void myfunc();
-    }
+    };
     
     int returnSomeStuff(int a, float b);
 }
