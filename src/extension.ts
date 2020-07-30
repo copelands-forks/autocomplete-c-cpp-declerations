@@ -1,4 +1,4 @@
-import { ExtensionContext, commands, window, workspace, Position, ViewColumn } from 'vscode'; //import vscode classes and workspace
+import { ExtensionContext, commands, window, workspace, Position, ViewColumn, Uri } from 'vscode'; //import vscode classes and workspace
 import { header, parse, indent } from './parse'; //import parse functions and class
 
 //settings

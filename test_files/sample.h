@@ -12,6 +12,11 @@ namespace sas
 
 
     class MyClass {
+        private:
+            int sas;
+            float ses;
+            double seses();
+
         public:
             void myfunc();
     };
