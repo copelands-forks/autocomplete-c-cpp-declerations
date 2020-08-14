@@ -81,7 +81,7 @@ function parsemainfile() {
                 }
             }
             parsedFileContent += h.namespace ? '}' : '';
-            editor.edit(editBuilder => editBuilder.insert(new vscode_1.Position(document.lineCount + 3, 0), parsedFileContent));
+            editor.edit(editBuilder => editBuilder.insert(new vscode_1.Position(document.lineCount + 2, 0), '\n' + parsedFileContent));
             deactivate();
         }
         else {

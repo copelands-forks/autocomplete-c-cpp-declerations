@@ -1,4 +1,4 @@
-import { ExtensionContext, commands, window, workspace, Position, ViewColumn, Uri } from 'vscode'; //import vscode classes and workspace
+import { ExtensionContext, commands, window, workspace, Position, ViewColumn } from 'vscode'; //import vscode classes and workspace
 import { header, parse, indent } from './parse'; //import parse functions and class
 
 //settings
@@ -79,8 +79,7 @@ function parsemainfile(): void {
 				}
 			}
 			parsedFileContent += h.namespace ? '}' : '';
-
-			editor.edit(editBuilder => editBuilder.insert(new Position(document.lineCount + 3, 0), parsedFileContent));
+			editor.edit(editBuilder => editBuilder.insert(new Position(document.lineCount + 2, 0), '\n' + parsedFileContent));
 			deactivate();
 		}else{
 			window.showWarningMessage('file type not supported');
