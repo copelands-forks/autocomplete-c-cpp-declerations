@@ -1,0 +1,22 @@
+class Header
+{
+    namespace?: string;
+    classes?: Array<Class>;
+    functions?: Array<Functions>;
+    fileName: string;
+    includes?: Array<string>;
+}
+
+class Class
+{
+    parentClasses?: Array<Class>;
+    type?: string;
+    className: string;
+    functions?: Array<Functions>;
+}
+
+class Function
+{
+    type: string;
+    name: string;
+}
