@@ -6,6 +6,11 @@
 	"engines": {
 		"vscode": "^1.43.0"
 	},
+	"publisher": "SteveSevetS",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/SteveSevetS/autocomplete-c-cpp-files.git"
+	},
 	"categories": [
 		"Programming Languages",
 		"Snippets"
