@@ -104,7 +104,7 @@ function lineIsInclude(line) {
     return line.startsWith('#include');
 }
 function lineIsMethodSignature(line) {
-    return line.includes(');');
+    return line.includes(');') && !(line.startsWith('typedef'));
 }
 function lineIsClass(line) {
     return line.startsWith('class');

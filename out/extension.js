@@ -13,6 +13,7 @@ const parse_1 = require("./parse"); //import parse functions and class
 //settings
 var indentStyle;
 var columnNumber;
+var triggerChar;
 function readSettings() {
     indentStyle = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
     columnNumber = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('columnNumber');
@@ -21,8 +22,59 @@ function readSettings() {
 // your extension is activated the very first time the command is executed
 function activate(context) {
     console.log('C/C++ autocomplete is running');
+    triggerChar = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
+    const provider1 = vscode_1.languages.registerCompletionItemProvider('c', {
+        provideCompletionItems(document, position, token, context) {
+            // a simple completion item which inserts `Hello World!`
+            /*const simpleCompletion = new CompletionItem('Hello World!');
+
+            // a completion item that inserts its text as snippet,
+            // the `insertText`-property is a `SnippetString` which will be
+            // honored by the editor.
+            const snippetCompletion = new CompletionItem('Good part of the day');
+            snippetCompletion.insertText = new SnippetString('Good ${1|morning,afternoon,evening|}. It is ${1}, right?');
+            const docs : any = new MarkdownString("Inserts a snippet that lets you select [link](x.ts).");
+
+            // a completion item that can be accepted by a commit character,
+            // the `commitCharacters`-property is set which means that the completion will
+            // be inserted and then the character will be typed.
+            const commitCharacterCompletion = new CompletionItem('console');
+            commitCharacterCompletion.commitCharacters = ['.'];
+            commitCharacterCompletion.documentation = new MarkdownString('Press `.` to get `console.`');
+
+            // a completion item that retriggers IntelliSense when being accepted,
+            // the `command`-property is set which the editor will execute after
+            // completion has been inserted. Also, the `insertText` is set so that
+            // a space is inserted after `new`
+            const commandCompletion = new CompletionItem('new');
+            commandCompletion.kind = CompletionItemKind.Keyword;
+            commandCompletion.insertText = 'new ';
+            commandCompletion.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' };
+
+            // return all completion items as array
+            return [
+                simpleCompletion,
+                snippetCompletion,
+                commitCharacterCompletion,
+                commandCompletion
+            ];*/
+            //block NOT to delete
+            let snippetsCompletition = [];
+            let editor = vscode_1.window.activeTextEditor;
+            if (editor) {
+                let text = editor.document.getText();
+                let h = new parse_1.header();
+                h = parse_1.parse(text);
+                for (let i = 0; i < h.methods.length; i++) {
+                    snippetsCompletition.push(new vscode_1.CompletionItem(h.methods[i]));
+                }
+            }
+            return snippetsCompletition;
+        }
+    });
     context.subscriptions.push(vscode_1.commands.registerCommand('extension.writeimplfile', writeimplfile));
     context.subscriptions.push(vscode_1.commands.registerCommand('extension.parsemainfile', parsemainfile));
+    context.subscriptions.push(provider1);
 }
 exports.activate = activate;
 function writeimplfile() {
@@ -91,6 +143,8 @@ function parsemainfile() {
     else {
         vscode_1.window.showWarningMessage('no open document, please open one and run the command again');
     }
+}
+function provideCompletitions() {
 }
 function openImplementationFile(fileContent, fileLanguage) {
     return __awaiter(this, void 0, void 0, function* () {

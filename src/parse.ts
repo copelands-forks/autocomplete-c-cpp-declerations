@@ -106,7 +106,7 @@ function lineIsInclude(line: string): boolean {
 }
 
 function lineIsMethodSignature(line: string): boolean {
-    return line.includes(');');
+    return line.includes(');') && !(line.startsWith('typedef'));
 }
 
 function lineIsClass(line: string): boolean {

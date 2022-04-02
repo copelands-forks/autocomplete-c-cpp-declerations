@@ -12,7 +12,9 @@ namespace myspace
 
         public:
             void mysas();
-    }
+            void sus();
+            void ses(int, int);
+            int sis(char, char *, char **, int(*funThrow)(float));
+    };
 }
-
 #endif // !SAS_H
