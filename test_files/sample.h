@@ -16,6 +16,7 @@ namespace sas
             int sas;
             float ses;
             double seses();
+            float sus(long);
 
         public:
             void myfunc();

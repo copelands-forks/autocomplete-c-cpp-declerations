@@ -14,6 +14,7 @@ const parse_1 = require("./parse"); //import parse functions and class
 var indentStyle;
 var columnNumber;
 var triggerChar;
+var completitionsAlreadyDone = [];
 function readSettings() {
     indentStyle = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
     columnNumber = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('columnNumber');
@@ -25,34 +26,42 @@ function activate(context) {
     triggerChar = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
     const C_provider = vscode_1.languages.registerCompletionItemProvider('c', {
         provideCompletionItems() {
-            let snippetsCompletition = [];
-            let editor = vscode_1.window.activeTextEditor;
-            if (editor) {
-                let text = editor.document.getText();
-                let h = new parse_1.header();
-                h = parse_1.parse(text);
-                for (let i = 0; i < h.methods.length; i++) {
-                    snippetsCompletition.push(new vscode_1.CompletionItem(h.methods[i]));
+            let completitions = createCompletitions(vscode_1.window.activeTextEditor);
+            let newCompletitions = [];
+            if (completitionsAlreadyDone.length == 0) {
+                completitionsAlreadyDone = completitionsAlreadyDone.concat(completitions);
+            }
+            else {
+                for (let i = 0; i < completitionsAlreadyDone.length; i++) {
+                    for (let j = 0; j < completitions.length; j++) {
+                        if (completitionsAlreadyDone[i].label != completitions[j].label) {
+                            newCompletitions.push(completitions[j]);
+                        }
+                    }
                 }
             }
-            return snippetsCompletition;
+            return completitionsAlreadyDone;
         }
-    });
+    }, triggerChar ? triggerChar : '.');
     const Cpp_provider = vscode_1.languages.registerCompletionItemProvider('cpp', {
         provideCompletionItems() {
-            let snippetsCompletition = [];
-            let editor = vscode_1.window.activeTextEditor;
-            if (editor) {
-                let text = editor.document.getText();
-                let h = new parse_1.header();
-                h = parse_1.parse(text);
-                for (let i = 0; i < h.methods.length; i++) {
-                    snippetsCompletition.push(new vscode_1.CompletionItem(h.methods[i]));
+            let completitions = createCompletitions(vscode_1.window.activeTextEditor);
+            let newCompletitions = [];
+            if (completitionsAlreadyDone.length == 0) {
+                completitionsAlreadyDone = completitionsAlreadyDone.concat(completitions);
+            }
+            else {
+                for (let i = 0; i < completitionsAlreadyDone.length; i++) {
+                    for (let j = 0; j < completitions.length; j++) {
+                        if (completitionsAlreadyDone[i].label != completitions[j].label) {
+                            newCompletitions.push(completitions[j]);
+                        }
+                    }
                 }
             }
-            return snippetsCompletition;
+            return completitionsAlreadyDone;
         }
-    });
+    }, triggerChar ? triggerChar : '.');
     context.subscriptions.push(vscode_1.commands.registerCommand('extension.writeimplfile', writeimplfile));
     context.subscriptions.push(vscode_1.commands.registerCommand('extension.parsemainfile', parsemainfile));
     context.subscriptions.push(C_provider, Cpp_provider);
@@ -125,7 +134,17 @@ function parsemainfile() {
         vscode_1.window.showWarningMessage('no open document, please open one and run the command again');
     }
 }
-function provideCompletitions() {
+function createCompletitions(editor) {
+    let snippetsCompletition = [];
+    if (editor) {
+        let text = editor.document.getText();
+        let h = new parse_1.header();
+        h = parse_1.parse(text);
+        for (let i = 0; i < h.methods.length; i++) {
+            snippetsCompletition.push(new vscode_1.CompletionItem(h.methods[i]));
+        }
+    }
+    return snippetsCompletition;
 }
 function openImplementationFile(fileContent, fileLanguage) {
     return __awaiter(this, void 0, void 0, function* () {

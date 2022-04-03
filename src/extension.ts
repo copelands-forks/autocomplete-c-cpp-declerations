@@ -1,10 +1,11 @@
-import { ExtensionContext, commands, window, workspace, Position, ViewColumn, CompletionList, languages, TextDocument, CancellationToken, CompletionContext, CompletionItem, SnippetString, MarkdownString, CompletionItemKind, Uri } from 'vscode'; //import vscode classes and workspace
+import { ExtensionContext, commands, window, workspace, Position, ViewColumn, CompletionList, languages, TextDocument, CancellationToken, CompletionContext, CompletionItem, SnippetString, MarkdownString, CompletionItemKind, Uri, TextEditor } from 'vscode'; //import vscode classes and workspace
 import { header, parse, indent } from './parse'; //import parse functions and class
 
 //settings
 var indentStyle: string | undefined;
 var columnNumber: ViewColumn | undefined;
 var triggerChar: string | undefined;
+var completitionsAlreadyDone: CompletionItem[] = [];
 
 function readSettings(): void {
 	indentStyle = workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
@@ -19,33 +20,39 @@ export function activate(context: ExtensionContext) {
 
 	const C_provider = languages.registerCompletionItemProvider('c', {
 		provideCompletionItems() {
-			let snippetsCompletition: CompletionItem[] = [];
-			let editor = window.activeTextEditor;
-			if(editor){
-				let text = editor.document.getText();
-				let h = new header();
-				h = parse(text);
-				for(let i = 0; i < h.methods.length; i++){
-					snippetsCompletition.push(new CompletionItem(h.methods[i]));
+			let completitions = createCompletitions(window.activeTextEditor);
+			let newCompletitions: CompletionItem[] = [];
+			if(completitionsAlreadyDone.length == 0){
+				completitionsAlreadyDone = completitionsAlreadyDone.concat(completitions);
+			} else {
+				for(let i = 0; i < completitionsAlreadyDone.length; i++){
+					for(let j = 0; j < completitions.length; j++){
+						if(completitionsAlreadyDone[i].label != completitions[j].label){
+							newCompletitions.push(completitions[j]);
+						}
+					}
 				}
 			}
-			return snippetsCompletition;
+			return completitionsAlreadyDone;
 		}
 	}, triggerChar ? triggerChar : '.');
 
 	const Cpp_provider = languages.registerCompletionItemProvider('cpp', {
 		provideCompletionItems() {
-			let snippetsCompletition: CompletionItem[] = [];
-			let editor = window.activeTextEditor;
-			if(editor){
-				let text = editor.document.getText();
-				let h = new header();
-				h = parse(text);
-				for(let i = 0; i < h.methods.length; i++){
-					snippetsCompletition.push(new CompletionItem(h.methods[i]));
+			let completitions = createCompletitions(window.activeTextEditor);
+			let newCompletitions: CompletionItem[] = [];
+			if(completitionsAlreadyDone.length == 0){
+				completitionsAlreadyDone = completitionsAlreadyDone.concat(completitions);
+			} else {
+				for(let i = 0; i < completitionsAlreadyDone.length; i++){
+					for(let j = 0; j < completitions.length; j++){
+						if(completitionsAlreadyDone[i].label != completitions[j].label){
+							newCompletitions.push(completitions[j]);
+						}
+					}
 				}
 			}
-			return snippetsCompletition;
+			return completitionsAlreadyDone;
 		}
 	}, triggerChar ? triggerChar : '.');
 
@@ -125,8 +132,17 @@ function parsemainfile(): void {
 	}
 }
 
-function provideCompletitions() {
-	
+function createCompletitions(editor: TextEditor | undefined) {
+	let snippetsCompletition: CompletionItem[] = [];
+	if(editor){
+		let text = editor.document.getText();
+		let h = new header();
+		h = parse(text);
+		for(let i = 0; i < h.methods.length; i++){
+			snippetsCompletition.push(new CompletionItem(h.methods[i]));
+		}
+	}
+	return snippetsCompletition;
 }
 
 async function openImplementationFile(fileContent: string, fileLanguage: string): Promise<void> {
