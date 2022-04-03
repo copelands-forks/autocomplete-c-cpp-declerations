@@ -22,17 +22,12 @@ export function activate(context: ExtensionContext) {
 		provideCompletionItems() {
 			let completitions = createCompletitions(window.activeTextEditor);
 			let newCompletitions: CompletionItem[] = [];
-			if(completitionsAlreadyDone.length == 0){
-				completitionsAlreadyDone = completitionsAlreadyDone.concat(completitions);
-			} else {
-				for(let i = 0; i < completitionsAlreadyDone.length; i++){
-					for(let j = 0; j < completitions.length; j++){
-						if(completitionsAlreadyDone[i].label != completitions[j].label){
-							newCompletitions.push(completitions[j]);
-						}
-					}
+			for(let i = 0; i < completitions.length; i++) {
+				if(!(arrayCompletitionIncludes(completitionsAlreadyDone, completitions[i]))){
+					newCompletitions.push(completitions[i]);
 				}
 			}
+			completitionsAlreadyDone = completitionsAlreadyDone.concat(newCompletitions);
 			return completitionsAlreadyDone;
 		}
 	}, triggerChar ? triggerChar : '.');
@@ -41,17 +36,12 @@ export function activate(context: ExtensionContext) {
 		provideCompletionItems() {
 			let completitions = createCompletitions(window.activeTextEditor);
 			let newCompletitions: CompletionItem[] = [];
-			if(completitionsAlreadyDone.length == 0){
-				completitionsAlreadyDone = completitionsAlreadyDone.concat(completitions);
-			} else {
-				for(let i = 0; i < completitionsAlreadyDone.length; i++){
-					for(let j = 0; j < completitions.length; j++){
-						if(completitionsAlreadyDone[i].label != completitions[j].label){
-							newCompletitions.push(completitions[j]);
-						}
-					}
+			for(let i = 0; i < completitions.length; i++) {
+				if(!(arrayCompletitionIncludes(completitionsAlreadyDone, completitions[i]))){
+					newCompletitions.push(completitions[i]);
 				}
 			}
+			completitionsAlreadyDone = completitionsAlreadyDone.concat(newCompletitions);
 			return completitionsAlreadyDone;
 		}
 	}, triggerChar ? triggerChar : '.');
@@ -143,6 +133,18 @@ function createCompletitions(editor: TextEditor | undefined) {
 		}
 	}
 	return snippetsCompletition;
+}
+
+function arrayCompletitionIncludes(array: CompletionItem[], el: CompletionItem): boolean {
+	let response = false;
+	if(array.length != 0){
+		for(let i = 0; i < array.length; i++){
+			if(array[i].label == el.label){
+				response = true;
+			}
+		}
+	}
+	return response;
 }
 
 async function openImplementationFile(fileContent: string, fileLanguage: string): Promise<void> {

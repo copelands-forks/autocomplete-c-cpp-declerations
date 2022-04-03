@@ -28,18 +28,12 @@ function activate(context) {
         provideCompletionItems() {
             let completitions = createCompletitions(vscode_1.window.activeTextEditor);
             let newCompletitions = [];
-            if (completitionsAlreadyDone.length == 0) {
-                completitionsAlreadyDone = completitionsAlreadyDone.concat(completitions);
-            }
-            else {
-                for (let i = 0; i < completitionsAlreadyDone.length; i++) {
-                    for (let j = 0; j < completitions.length; j++) {
-                        if (completitionsAlreadyDone[i].label != completitions[j].label) {
-                            newCompletitions.push(completitions[j]);
-                        }
-                    }
+            for (let i = 0; i < completitions.length; i++) {
+                if (!(arrayCompletitionIncludes(completitionsAlreadyDone, completitions[i]))) {
+                    newCompletitions.push(completitions[i]);
                 }
             }
+            completitionsAlreadyDone = completitionsAlreadyDone.concat(newCompletitions);
             return completitionsAlreadyDone;
         }
     }, triggerChar ? triggerChar : '.');
@@ -47,18 +41,12 @@ function activate(context) {
         provideCompletionItems() {
             let completitions = createCompletitions(vscode_1.window.activeTextEditor);
             let newCompletitions = [];
-            if (completitionsAlreadyDone.length == 0) {
-                completitionsAlreadyDone = completitionsAlreadyDone.concat(completitions);
-            }
-            else {
-                for (let i = 0; i < completitionsAlreadyDone.length; i++) {
-                    for (let j = 0; j < completitions.length; j++) {
-                        if (completitionsAlreadyDone[i].label != completitions[j].label) {
-                            newCompletitions.push(completitions[j]);
-                        }
-                    }
+            for (let i = 0; i < completitions.length; i++) {
+                if (!(arrayCompletitionIncludes(completitionsAlreadyDone, completitions[i]))) {
+                    newCompletitions.push(completitions[i]);
                 }
             }
+            completitionsAlreadyDone = completitionsAlreadyDone.concat(newCompletitions);
             return completitionsAlreadyDone;
         }
     }, triggerChar ? triggerChar : '.');
@@ -145,6 +133,17 @@ function createCompletitions(editor) {
         }
     }
     return snippetsCompletition;
+}
+function arrayCompletitionIncludes(array, el) {
+    let response = false;
+    if (array.length != 0) {
+        for (let i = 0; i < array.length; i++) {
+            if (array[i].label == el.label) {
+                response = true;
+            }
+        }
+    }
+    return response;
 }
 function openImplementationFile(fileContent, fileLanguage) {
     return __awaiter(this, void 0, void 0, function* () {
