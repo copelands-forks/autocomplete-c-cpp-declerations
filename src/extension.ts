@@ -17,43 +17,8 @@ export function activate(context: ExtensionContext) {
 	console.log('C/C++ autocomplete is running');
 	triggerChar = workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
 
-	const provider1 = languages.registerCompletionItemProvider('c', {
-		provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken, context: CompletionContext) {
-			// a simple completion item which inserts `Hello World!`
-			/*const simpleCompletion = new CompletionItem('Hello World!');
-
-			// a completion item that inserts its text as snippet,
-			// the `insertText`-property is a `SnippetString` which will be
-			// honored by the editor.
-			const snippetCompletion = new CompletionItem('Good part of the day');
-			snippetCompletion.insertText = new SnippetString('Good ${1|morning,afternoon,evening|}. It is ${1}, right?');
-			const docs : any = new MarkdownString("Inserts a snippet that lets you select [link](x.ts).");
-
-			// a completion item that can be accepted by a commit character,
-			// the `commitCharacters`-property is set which means that the completion will
-			// be inserted and then the character will be typed.
-			const commitCharacterCompletion = new CompletionItem('console');
-			commitCharacterCompletion.commitCharacters = ['.'];
-			commitCharacterCompletion.documentation = new MarkdownString('Press `.` to get `console.`');
-
-			// a completion item that retriggers IntelliSense when being accepted,
-			// the `command`-property is set which the editor will execute after 
-			// completion has been inserted. Also, the `insertText` is set so that 
-			// a space is inserted after `new`
-			const commandCompletion = new CompletionItem('new');
-			commandCompletion.kind = CompletionItemKind.Keyword;
-			commandCompletion.insertText = 'new ';
-			commandCompletion.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' };
-
-			// return all completion items as array
-			return [
-				simpleCompletion,
-				snippetCompletion,
-				commitCharacterCompletion,
-				commandCompletion
-			];*/
-
-			//block NOT to delete
+	const C_provider = languages.registerCompletionItemProvider('c', {
+		provideCompletionItems() {
 			let snippetsCompletition: CompletionItem[] = [];
 			let editor = window.activeTextEditor;
 			if(editor){
@@ -66,12 +31,28 @@ export function activate(context: ExtensionContext) {
 			}
 			return snippetsCompletition;
 		}
-	});
+	}, triggerChar ? triggerChar : '.');
+
+	const Cpp_provider = languages.registerCompletionItemProvider('cpp', {
+		provideCompletionItems() {
+			let snippetsCompletition: CompletionItem[] = [];
+			let editor = window.activeTextEditor;
+			if(editor){
+				let text = editor.document.getText();
+				let h = new header();
+				h = parse(text);
+				for(let i = 0; i < h.methods.length; i++){
+					snippetsCompletition.push(new CompletionItem(h.methods[i]));
+				}
+			}
+			return snippetsCompletition;
+		}
+	}, triggerChar ? triggerChar : '.');
 
 	context.subscriptions.push(commands.registerCommand('extension.writeimplfile', writeimplfile));
 	context.subscriptions.push(commands.registerCommand('extension.parsemainfile', parsemainfile));
 
-	context.subscriptions.push(provider1);
+	context.subscriptions.push(C_provider, Cpp_provider);
 }
 
 function writeimplfile(): void {
