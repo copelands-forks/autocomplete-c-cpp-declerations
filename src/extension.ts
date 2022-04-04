@@ -10,13 +10,17 @@ var completitionsAlreadyDone: CompletionItem[] = [];
 function readSettings(): void {
 	indentStyle = workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
 	columnNumber = workspace.getConfiguration('autocomplete-c-cpp-files').get('columnNumber');
+	triggerChar = workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
 }
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: ExtensionContext) {
 	console.log('C/C++ autocomplete is running');
-	triggerChar = workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
+	readSettings();
+	// if(window.activeTextEditor){
+	// 	console.log(workspace.getWorkspaceFolder(window.activeTextEditor.document.uri));
+	// }
 
 	const C_provider = languages.registerCompletionItemProvider('c', {
 		provideCompletionItems() {

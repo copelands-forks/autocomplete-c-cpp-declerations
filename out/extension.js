@@ -18,12 +18,16 @@ var completitionsAlreadyDone = [];
 function readSettings() {
     indentStyle = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
     columnNumber = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('columnNumber');
+    triggerChar = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
 }
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
     console.log('C/C++ autocomplete is running');
-    triggerChar = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
+    readSettings();
+    // if(window.activeTextEditor){
+    // 	console.log(workspace.getWorkspaceFolder(window.activeTextEditor.document.uri));
+    // }
     const C_provider = vscode_1.languages.registerCompletionItemProvider('c', {
         provideCompletionItems() {
             let completitions = createCompletitions(vscode_1.window.activeTextEditor);
