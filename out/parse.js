@@ -82,7 +82,10 @@ function formatMethodsignature(methodSignature, className) {
                 formattedMethodSignature += arrayMethodSignature2[i] + ' ';
             }
         }
-        formattedMethodSignature += `${className}::${arrayMethodSignature2[arrayMethodSignature2.length - 1] + '(' + arrayMethodSignature[arrayMethodSignature.length - 1]}`;
+        formattedMethodSignature += `${className}::${arrayMethodSignature2[arrayMethodSignature2.length - 1]}`;
+        for (let i = 1; i < arrayMethodSignature.length; i++) {
+            formattedMethodSignature += '(' + `${arrayMethodSignature[i]}`;
+        }
     }
     else {
         formattedMethodSignature = methodSignature;
@@ -100,6 +103,17 @@ function indent(methodSignature, indentationStyle, tab) {
     return tab ? `\n\t${methodSignature}${separator}\t{\n\t\t\n\t}\n` : `\n${methodSignature}${separator}{\n\t\n}\n`;
 }
 exports.indent = indent;
+function fileIsMain(lines) {
+    let response = false;
+    for (let i = 0; i < lines.length; i++) {
+        if (lineIsMain(lines[i])) {
+            response = true;
+            i = lines.length;
+        }
+    }
+    return response;
+}
+exports.fileIsMain = fileIsMain;
 function lineIsInclude(line) {
     return line.startsWith('#include');
 }

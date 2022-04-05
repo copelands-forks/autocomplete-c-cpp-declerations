@@ -1,11 +1,10 @@
-import { ExtensionContext, commands, window, workspace, Position, ViewColumn, CompletionList, languages, TextDocument, CancellationToken, CompletionContext, CompletionItem, SnippetString, MarkdownString, CompletionItemKind, Uri, TextEditor } from 'vscode'; //import vscode classes and workspace
-import { header, parse, indent } from './parse'; //import parse functions and class
+import { ExtensionContext, commands, window, workspace, Position, ViewColumn, CompletionList, languages, TextDocument, CancellationToken, CompletionContext, CompletionItem, SnippetString, MarkdownString, CompletionItemKind, Uri, TextEditor, WorkspaceFolder } from 'vscode'; //import vscode classes and workspace
+import { header, parse, indent, fileIsMain } from './parse'; //import parse functions and class
 
 //settings
 var indentStyle: string | undefined;
 var columnNumber: ViewColumn | undefined;
 var triggerChar: string | undefined;
-var completitionsAlreadyDone: CompletionItem[] = [];
 
 function readSettings(): void {
 	indentStyle = workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
@@ -15,38 +14,22 @@ function readSettings(): void {
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
-export function activate(context: ExtensionContext) {
+export async function activate(context: ExtensionContext) {
 	console.log('C/C++ autocomplete is running');
 	readSettings();
-	// if(window.activeTextEditor){
-	// 	console.log(workspace.getWorkspaceFolder(window.activeTextEditor.document.uri));
-	// }
+	if(window.activeTextEditor){
+		createCompletitions(window.activeTextEditor);
+	}
 
 	const C_provider = languages.registerCompletionItemProvider('c', {
-		provideCompletionItems() {
-			let completitions = createCompletitions(window.activeTextEditor);
-			let newCompletitions: CompletionItem[] = [];
-			for(let i = 0; i < completitions.length; i++) {
-				if(!(arrayCompletitionIncludes(completitionsAlreadyDone, completitions[i]))){
-					newCompletitions.push(completitions[i]);
-				}
-			}
-			completitionsAlreadyDone = completitionsAlreadyDone.concat(newCompletitions);
-			return completitionsAlreadyDone;
+		async provideCompletionItems() {
+			return await createCompletitions(window.activeTextEditor);
 		}
 	}, triggerChar ? triggerChar : '.');
 
 	const Cpp_provider = languages.registerCompletionItemProvider('cpp', {
-		provideCompletionItems() {
-			let completitions = createCompletitions(window.activeTextEditor);
-			let newCompletitions: CompletionItem[] = [];
-			for(let i = 0; i < completitions.length; i++) {
-				if(!(arrayCompletitionIncludes(completitionsAlreadyDone, completitions[i]))){
-					newCompletitions.push(completitions[i]);
-				}
-			}
-			completitionsAlreadyDone = completitionsAlreadyDone.concat(newCompletitions);
-			return completitionsAlreadyDone;
+		async provideCompletionItems() {
+			return await createCompletitions(window.activeTextEditor);
 		}
 	}, triggerChar ? triggerChar : '.');
 
@@ -57,7 +40,6 @@ export function activate(context: ExtensionContext) {
 }
 
 function writeimplfile(): void {
-	readSettings();
 	let editor = window.activeTextEditor;
 	if(editor){
 		let document = editor.document;
@@ -95,7 +77,6 @@ function writeimplfile(): void {
 }
 
 function parsemainfile(): void {
-	readSettings();
 	let editor = window.activeTextEditor;
 	if(editor){
 		let document = editor.document;
@@ -109,11 +90,7 @@ function parsemainfile(): void {
 			
 			parsedFileContent += h.namespace ? `\n${h.namespace}` : '';
 			for(let i = 0; i < h.methods.length; i++){
-				if(h.namespace){
-					parsedFileContent += indent(h.methods[i], indentStyle, true);
-				}else{
-					parsedFileContent += indent(h.methods[i], indentStyle, false);
-				}
+				parsedFileContent += indent(h.methods[i], indentStyle, h.namespace ? true : false);
 			}
 			parsedFileContent += h.namespace ? '}' : '';
 			editor.edit(editBuilder => editBuilder.insert(new Position(document.lineCount + 2, 0), '\n' + parsedFileContent));
@@ -126,29 +103,44 @@ function parsemainfile(): void {
 	}
 }
 
-function createCompletitions(editor: TextEditor | undefined) {
-	let snippetsCompletition: CompletionItem[] = [];
-	if(editor){
-		let text = editor.document.getText();
-		let h = new header();
-		h = parse(text);
-		for(let i = 0; i < h.methods.length; i++){
-			snippetsCompletition.push(new CompletionItem(h.methods[i]));
-		}
+function parseAndCreateCompletitions(fileContent: string): CompletionItem[] {
+	let h = new	header();
+	let completitions: CompletionItem[] = [];
+	h = parse(fileContent);
+	h.methods.forEach(el => {
+		let completition = new CompletionItem(el);
+		completition.insertText = new SnippetString(indent(el, indentStyle, false)); 
+		completitions.push(completition);
+	});
+	if(h.namespace){
+		completitions.push(new CompletionItem(h.namespace + '\n}'));
 	}
-	return snippetsCompletition;
+	return completitions;
 }
 
-function arrayCompletitionIncludes(array: CompletionItem[], el: CompletionItem): boolean {
-	let response = false;
-	if(array.length != 0){
-		for(let i = 0; i < array.length; i++){
-			if(array[i].label == el.label){
-				response = true;
+async function createCompletitions(editor: TextEditor | undefined) : Promise<CompletionItem[]> {
+	let completitions: CompletionItem[] = [];
+	if(editor){
+		let doc = editor.document;
+		let lines = editor.document.getText();
+		if(doc.fileName.endsWith('.c') || doc.fileName.endsWith('.cpp')){
+			if(fileIsMain(lines.split('\n'))){
+				//create completitions
+				completitions = parseAndCreateCompletitions(lines);
+			} else {
+				//open the header file and create completitions
+				let pathToHeader: string = '';
+				if(window.activeTextEditor){
+					console.log(window.activeTextEditor.document.uri);
+				}
+				pathToHeader = doc.fileName.replace(doc.fileName.endsWith('.c') ? '.c' : '.cpp', '.h');
+				let headerUri = Uri.file(pathToHeader);
+				let fileContent = await workspace.fs.readFile(headerUri);
+				completitions = parseAndCreateCompletitions(fileContent.toString());
 			}
 		}
 	}
-	return response;
+	return completitions;
 }
 
 async function openImplementationFile(fileContent: string, fileLanguage: string): Promise<void> {
