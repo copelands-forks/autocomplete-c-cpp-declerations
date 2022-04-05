@@ -31,20 +31,31 @@ whith the main file
 ![with the main file](https://github.com/SteveSevetS/autocomplete-c-cpp-files/blob/master/images/parse_main_file.gif?raw=true)
 > The command will read the focused file in the editor and will append the methods signatures at the end of the file.
 
+### Completions:
+
+Now you can automatically add funcions signatures without run the commands!
+
+For example, you are working in an existing file and you want to add a function signature now you can automatically do this just by typing the `.` character or the one you choose (See Extension Setting for more info)
+
+![Completions in action]()
+
 ## Extension Settings
 
 this extension can be custimizabile with some settings
 
-For example:
-
 * `autocomplete-c-cpp-files.indentStyle`: choose the indentation style between K&R (default) and Allman click [here](https://en.wikipedia.org/wiki/Indentation_style#Brace_placement_in_compound_statements) for more information
 * `autocomplete-c-cpp-files.columnNumber`: choose the column to open the implementation file, default is 2 (will open the file side by side the header file in the editor) 
+* `autocomplete-c-cpp-files.triggerChar`: choose the character for completions `.` is the default one
 
 ## Known Issues
 
 Right now there are no issues, if you find one please report it [here](https://github.com/SteveSevetS/autocomplete-c-cpp-files/issues).
 
 ## Release Notes
+
+### 1.0.0
+
+Added completions
 
 ### 0.0.1
 
