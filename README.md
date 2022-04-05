@@ -37,7 +37,7 @@ Now you can automatically add funcions signatures without run the commands!
 
 For example, you are working in an existing file and you want to add a function signature now you can automatically do this just by typing the `.` character or the one you choose (See Extension Setting for more info)
 
-![Completions in action]()
+![Completions in action](https://github.com/SteveSevetS/autocomplete-c-cpp-files/blob/master/images/completions.png?raw=true)
 
 ## Extension Settings
 
