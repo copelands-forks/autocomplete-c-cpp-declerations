@@ -17,7 +17,9 @@
 	],
 	"activationEvents": [
 		"onCommand:extension.writeimplfile",
-		"onCommand:extension.parsemainfile"
+		"onCommand:extension.parsemainfile",
+		"onLanguage:c",
+		"onLanguage:cpp"
 	],
 	"main": "./out/extension.js",
 	"contributes": {

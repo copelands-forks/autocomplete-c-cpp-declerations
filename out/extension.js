@@ -25,20 +25,17 @@ function activate(context) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('C/C++ autocomplete is running');
         readSettings();
-        if (vscode_1.window.activeTextEditor) {
-            createCompletitions(vscode_1.window.activeTextEditor);
-        }
         const C_provider = vscode_1.languages.registerCompletionItemProvider('c', {
-            provideCompletionItems() {
+            provideCompletionItems(document, position) {
                 return __awaiter(this, void 0, void 0, function* () {
-                    return yield createCompletitions(vscode_1.window.activeTextEditor);
+                    return yield createCompletitions(vscode_1.window.activeTextEditor, new vscode_1.Range(position, position.translate(0, -1)));
                 });
             }
         }, triggerChar ? triggerChar : '.');
         const Cpp_provider = vscode_1.languages.registerCompletionItemProvider('cpp', {
-            provideCompletionItems() {
+            provideCompletionItems(document, position) {
                 return __awaiter(this, void 0, void 0, function* () {
-                    return yield createCompletitions(vscode_1.window.activeTextEditor);
+                    return yield createCompletitions(vscode_1.window.activeTextEditor, new vscode_1.Range(position, position.translate(0, -1)));
                 });
             }
         }, triggerChar ? triggerChar : '.');
@@ -108,21 +105,23 @@ function parsemainfile() {
         vscode_1.window.showWarningMessage('no open document, please open one and run the command again');
     }
 }
-function parseAndCreateCompletitions(fileContent) {
+function parseAndCreateCompletitions(fileContent, deleteRange) {
     let h = new parse_1.header();
     let completitions = [];
     h = parse_1.parse(fileContent);
     h.methods.forEach(el => {
         let completition = new vscode_1.CompletionItem(el);
-        completition.insertText = new vscode_1.SnippetString(parse_1.indent(el, indentStyle, false));
+        completition.additionalTextEdits = [vscode_1.TextEdit.delete(deleteRange)];
         completitions.push(completition);
     });
     if (h.namespace) {
-        completitions.push(new vscode_1.CompletionItem(h.namespace + '\n}'));
+        let namespaceCompletition = new vscode_1.CompletionItem(h.namespace.slice(0, h.namespace.length - 2));
+        namespaceCompletition.additionalTextEdits = [vscode_1.TextEdit.delete(deleteRange)];
+        completitions.push(namespaceCompletition);
     }
     return completitions;
 }
-function createCompletitions(editor) {
+function createCompletitions(editor, deleteRange) {
     return __awaiter(this, void 0, void 0, function* () {
         let completitions = [];
         if (editor) {
@@ -131,18 +130,15 @@ function createCompletitions(editor) {
             if (doc.fileName.endsWith('.c') || doc.fileName.endsWith('.cpp')) {
                 if (parse_1.fileIsMain(lines.split('\n'))) {
                     //create completitions
-                    completitions = parseAndCreateCompletitions(lines);
+                    completitions = parseAndCreateCompletitions(lines, deleteRange);
                 }
                 else {
                     //open the header file and create completitions
                     let pathToHeader = '';
-                    if (vscode_1.window.activeTextEditor) {
-                        console.log(vscode_1.window.activeTextEditor.document.uri);
-                    }
                     pathToHeader = doc.fileName.replace(doc.fileName.endsWith('.c') ? '.c' : '.cpp', '.h');
                     let headerUri = vscode_1.Uri.file(pathToHeader);
                     let fileContent = yield vscode_1.workspace.fs.readFile(headerUri);
-                    completitions = parseAndCreateCompletitions(fileContent.toString());
+                    completitions = parseAndCreateCompletitions(fileContent.toString(), deleteRange);
                 }
             }
         }

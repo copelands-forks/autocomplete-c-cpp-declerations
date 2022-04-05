@@ -4,7 +4,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * defines a .c or .cpp header that defines
  * @field namespace is the namespace name
  * @field class is the name of the class
- * @field methods is the array that contanins the methods signatures
+ * @field includes is the array that contains the headers included
+ * @field methods is the array that contains the methods signatures
  */
 class header {
     constructor() {

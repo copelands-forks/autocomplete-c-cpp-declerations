@@ -1,4 +1,4 @@
-import { ExtensionContext, commands, window, workspace, Position, ViewColumn, CompletionList, languages, TextDocument, CancellationToken, CompletionContext, CompletionItem, SnippetString, MarkdownString, CompletionItemKind, Uri, TextEditor, WorkspaceFolder } from 'vscode'; //import vscode classes and workspace
+import { ExtensionContext, commands, window, workspace, Position, ViewColumn, languages, CompletionItem, SnippetString, Uri, TextEditor, Range, TextEdit } from 'vscode'; //import vscode classes and workspace
 import { header, parse, indent, fileIsMain } from './parse'; //import parse functions and class
 
 //settings
@@ -17,19 +17,16 @@ function readSettings(): void {
 export async function activate(context: ExtensionContext) {
 	console.log('C/C++ autocomplete is running');
 	readSettings();
-	if(window.activeTextEditor){
-		createCompletitions(window.activeTextEditor);
-	}
 
 	const C_provider = languages.registerCompletionItemProvider('c', {
-		async provideCompletionItems() {
-			return await createCompletitions(window.activeTextEditor);
+		async provideCompletionItems(document, position) {
+			return await createCompletitions(window.activeTextEditor, new Range(position, position.translate(0, -1)));
 		}
 	}, triggerChar ? triggerChar : '.');
 
 	const Cpp_provider = languages.registerCompletionItemProvider('cpp', {
-		async provideCompletionItems() {
-			return await createCompletitions(window.activeTextEditor);
+		async provideCompletionItems(document, position) {
+			return await createCompletitions(window.activeTextEditor, new Range(position, position.translate(0, -1)));
 		}
 	}, triggerChar ? triggerChar : '.');
 
@@ -103,22 +100,24 @@ function parsemainfile(): void {
 	}
 }
 
-function parseAndCreateCompletitions(fileContent: string): CompletionItem[] {
+function parseAndCreateCompletitions(fileContent: string, deleteRange: Range): CompletionItem[] {
 	let h = new	header();
 	let completitions: CompletionItem[] = [];
 	h = parse(fileContent);
 	h.methods.forEach(el => {
 		let completition = new CompletionItem(el);
-		completition.insertText = new SnippetString(indent(el, indentStyle, false)); 
+		completition.additionalTextEdits = [TextEdit.delete(deleteRange)];
 		completitions.push(completition);
 	});
 	if(h.namespace){
-		completitions.push(new CompletionItem(h.namespace + '\n}'));
+		let namespaceCompletition = new CompletionItem(h.namespace.slice(0, h.namespace.length - 2));
+		namespaceCompletition.additionalTextEdits = [TextEdit.delete(deleteRange)];
+		completitions.push(namespaceCompletition);
 	}
 	return completitions;
 }
 
-async function createCompletitions(editor: TextEditor | undefined) : Promise<CompletionItem[]> {
+async function createCompletitions(editor: TextEditor | undefined, deleteRange: Range) : Promise<CompletionItem[]> {
 	let completitions: CompletionItem[] = [];
 	if(editor){
 		let doc = editor.document;
@@ -126,17 +125,14 @@ async function createCompletitions(editor: TextEditor | undefined) : Promise<Com
 		if(doc.fileName.endsWith('.c') || doc.fileName.endsWith('.cpp')){
 			if(fileIsMain(lines.split('\n'))){
 				//create completitions
-				completitions = parseAndCreateCompletitions(lines);
+				completitions = parseAndCreateCompletitions(lines, deleteRange);
 			} else {
 				//open the header file and create completitions
 				let pathToHeader: string = '';
-				if(window.activeTextEditor){
-					console.log(window.activeTextEditor.document.uri);
-				}
 				pathToHeader = doc.fileName.replace(doc.fileName.endsWith('.c') ? '.c' : '.cpp', '.h');
 				let headerUri = Uri.file(pathToHeader);
 				let fileContent = await workspace.fs.readFile(headerUri);
-				completitions = parseAndCreateCompletitions(fileContent.toString());
+				completitions = parseAndCreateCompletitions(fileContent.toString(), deleteRange);
 			}
 		}
 	}
