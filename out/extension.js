@@ -14,10 +14,12 @@ const parse_1 = require("./parse"); //import parse functions and class
 var indentStyle;
 var columnNumber;
 var triggerChar;
+var headersFolder;
 function readSettings() {
     indentStyle = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
     columnNumber = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('columnNumber');
     triggerChar = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
+    headersFolder = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('headersFolder');
 }
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -123,6 +125,7 @@ function parseAndCreateCompletitions(fileContent, deleteRange) {
 }
 function createCompletitions(editor, deleteRange) {
     return __awaiter(this, void 0, void 0, function* () {
+        readSettings();
         let completitions = [];
         if (editor) {
             let doc = editor.document;
@@ -136,6 +139,9 @@ function createCompletitions(editor, deleteRange) {
                     //open the header file and create completitions
                     let pathToHeader = '';
                     pathToHeader = doc.fileName.replace(doc.fileName.endsWith('.c') ? '.c' : '.cpp', '.h');
+                    if (headersFolder) {
+                        pathToHeader = addHeadersFolderToPath(pathToHeader, headersFolder);
+                    }
                     let headerUri = vscode_1.Uri.file(pathToHeader);
                     let fileContent = yield vscode_1.workspace.fs.readFile(headerUri);
                     completitions = parseAndCreateCompletitions(fileContent.toString(), deleteRange);
@@ -144,6 +150,15 @@ function createCompletitions(editor, deleteRange) {
         }
         return completitions;
     });
+}
+function addHeadersFolderToPath(path, headersFolder) {
+    let temp = path.split('/');
+    path = '';
+    temp[temp.length - 2] += '/' + headersFolder;
+    temp.forEach(el => {
+        path += el + '/';
+    });
+    return path.slice(0, path.length - 1);
 }
 function openImplementationFile(fileContent, fileLanguage) {
     return __awaiter(this, void 0, void 0, function* () {

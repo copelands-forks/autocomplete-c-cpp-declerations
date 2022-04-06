@@ -44,8 +44,9 @@ For example, you are working in an existing file and you want to add a function 
 this extension can be custimizabile with some settings
 
 * `autocomplete-c-cpp-files.indentStyle`: choose the indentation style between K&R (default) and Allman click [here](https://en.wikipedia.org/wiki/Indentation_style#Brace_placement_in_compound_statements) for more information
-* `autocomplete-c-cpp-files.columnNumber`: choose the column to open the implementation file, default is 2 (will open the file side by side the header file in the editor) 
+* `autocomplete-c-cpp-files.columnNumber`: choose the column to open the implementation file, default is `2` (will open the file side by side the header file in the editor) 
 * `autocomplete-c-cpp-files.triggerChar`: choose the character for completions `.` is the default one
+* `autocomplete-c-cpp-files.headersFolder`: name of the folder where are the headers file, default is `null`. Specify only the name of the directory or the relative path to it starting from the folder where the implementation files are, Example: `include` or `include/mylib` or `../include`
 
 ## Known Issues
 

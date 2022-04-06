@@ -5,11 +5,13 @@ import { header, parse, indent, fileIsMain } from './parse'; //import parse func
 var indentStyle: string | undefined;
 var columnNumber: ViewColumn | undefined;
 var triggerChar: string | undefined;
+var headersFolder: string | undefined;
 
 function readSettings(): void {
 	indentStyle = workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
 	columnNumber = workspace.getConfiguration('autocomplete-c-cpp-files').get('columnNumber');
 	triggerChar = workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
+	headersFolder = workspace.getConfiguration('autocomplete-c-cpp-files').get('headersFolder')
 }
 
 // this method is called when your extension is activated
@@ -118,6 +120,7 @@ function parseAndCreateCompletitions(fileContent: string, deleteRange: Range): C
 }
 
 async function createCompletitions(editor: TextEditor | undefined, deleteRange: Range) : Promise<CompletionItem[]> {
+	readSettings();
 	let completitions: CompletionItem[] = [];
 	if(editor){
 		let doc = editor.document;
@@ -130,6 +133,9 @@ async function createCompletitions(editor: TextEditor | undefined, deleteRange: 
 				//open the header file and create completitions
 				let pathToHeader: string = '';
 				pathToHeader = doc.fileName.replace(doc.fileName.endsWith('.c') ? '.c' : '.cpp', '.h');
+				if(headersFolder){
+					pathToHeader = addHeadersFolderToPath(pathToHeader, headersFolder);
+				}
 				let headerUri = Uri.file(pathToHeader);
 				let fileContent = await workspace.fs.readFile(headerUri);
 				completitions = parseAndCreateCompletitions(fileContent.toString(), deleteRange);
@@ -137,6 +143,16 @@ async function createCompletitions(editor: TextEditor | undefined, deleteRange: 
 		}
 	}
 	return completitions;
+}
+
+function addHeadersFolderToPath(path: string, headersFolder: string): string {
+	let temp = path.split('/');
+	path = '';
+	temp[temp.length - 2] += '/' + headersFolder;
+	temp.forEach( el => {
+		path += el + '/'
+	});
+	return path.slice(0, path.length - 1);
 }
 
 async function openImplementationFile(fileContent: string, fileLanguage: string): Promise<void> {
