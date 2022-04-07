@@ -11,7 +11,7 @@ function readSettings(): void {
 	indentStyle = workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
 	columnNumber = workspace.getConfiguration('autocomplete-c-cpp-files').get('columnNumber');
 	triggerChar = workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
-	headersFolder = workspace.getConfiguration('autocomplete-c-cpp-files').get('headersFolder')
+	headersFolder = workspace.getConfiguration('autocomplete-c-cpp-files').get('headersFolder');
 }
 
 // this method is called when your extension is activated
@@ -133,9 +133,13 @@ async function createCompletitions(editor: TextEditor | undefined, deleteRange: 
 				//open the header file and create completitions
 				let pathToHeader: string = '';
 				pathToHeader = doc.fileName.replace(doc.fileName.endsWith('.c') ? '.c' : '.cpp', '.h');
-				if(headersFolder){
+				console.log(pathToHeader);
+				if(headersFolder != null){
 					pathToHeader = addHeadersFolderToPath(pathToHeader, headersFolder);
+					console.log('path modificato');
 				}
+				console.log(headersFolder);
+				console.log(pathToHeader);
 				let headerUri = Uri.file(pathToHeader);
 				let fileContent = await workspace.fs.readFile(headerUri);
 				completitions = parseAndCreateCompletitions(fileContent.toString(), deleteRange);
@@ -146,11 +150,15 @@ async function createCompletitions(editor: TextEditor | undefined, deleteRange: 
 }
 
 function addHeadersFolderToPath(path: string, headersFolder: string): string {
-	let temp = path.split('/');
+	let separationToken = process.platform == 'win32' ? '\\' : '/';
+	if(separationToken == '\\'){
+		headersFolder = headersFolder.replace('/', '\\');
+	}
+	let temp = path.split(separationToken);
 	path = '';
-	temp[temp.length - 2] += '/' + headersFolder;
+	temp[temp.length - 2] += separationToken + headersFolder;
 	temp.forEach( el => {
-		path += el + '/'
+		path += el + separationToken
 	});
 	return path.slice(0, path.length - 1);
 }

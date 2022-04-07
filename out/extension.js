@@ -139,9 +139,13 @@ function createCompletitions(editor, deleteRange) {
                     //open the header file and create completitions
                     let pathToHeader = '';
                     pathToHeader = doc.fileName.replace(doc.fileName.endsWith('.c') ? '.c' : '.cpp', '.h');
-                    if (headersFolder) {
+                    console.log(pathToHeader);
+                    if (headersFolder != null) {
                         pathToHeader = addHeadersFolderToPath(pathToHeader, headersFolder);
+                        console.log('path modificato');
                     }
+                    console.log(headersFolder);
+                    console.log(pathToHeader);
                     let headerUri = vscode_1.Uri.file(pathToHeader);
                     let fileContent = yield vscode_1.workspace.fs.readFile(headerUri);
                     completitions = parseAndCreateCompletitions(fileContent.toString(), deleteRange);
@@ -152,11 +156,15 @@ function createCompletitions(editor, deleteRange) {
     });
 }
 function addHeadersFolderToPath(path, headersFolder) {
-    let temp = path.split('/');
+    let separationToken = process.platform == 'win32' ? '\\' : '/';
+    if (separationToken == '\\') {
+        headersFolder = headersFolder.replace('/', '\\');
+    }
+    let temp = path.split(separationToken);
     path = '';
-    temp[temp.length - 2] += '/' + headersFolder;
+    temp[temp.length - 2] += separationToken + headersFolder;
     temp.forEach(el => {
-        path += el + '/';
+        path += el + separationToken;
     });
     return path.slice(0, path.length - 1);
 }
