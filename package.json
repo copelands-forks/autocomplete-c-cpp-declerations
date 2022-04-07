@@ -51,9 +51,14 @@
 					"description": "choose the indentation style"
 				},
 				"autocomplete-c-cpp-files.triggerChar": {
-					"type": "string",
+					"type": ["string"],
 					"default": ".",
 					"description": "char to write to trigger the completition"
+				},
+				"autocomplete-c-cpp-files.headersFolder": {
+					"type": ["string", "null"],
+					"default": null,
+					"description": "foldername of the headers files default is the root folder of your workspaces"
 				}
 			}
 		},
