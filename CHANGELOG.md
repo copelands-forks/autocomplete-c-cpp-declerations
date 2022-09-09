@@ -2,6 +2,9 @@
 
 All notable changes to this extension will be documented in this file.
 
+## [1.0.2] - 2022-09-09
+- minor changes
+
 ## [1.0.1] - 2022-04-06
 - added the option to specify the include directory ofthe project you're working on. See settings section in README.md
 
