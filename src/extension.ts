@@ -21,21 +21,19 @@ export async function activate(context: ExtensionContext) {
 	console.log('C/C++ autocomplete is running');
 	readSettings();
 	pathSeparationToken = process.platform == 'win32' ? '\\' : '/';
-
-	if(workspace.workspaceFolders)
-		console.log(workspace.workspaceFolders[0].uri.path)
+	triggerChar = triggerChar ? triggerChar : '.';
 
 	const C_provider = languages.registerCompletionItemProvider('c', {
 		async provideCompletionItems(document, position) {
 			return await createCompletitions(window.activeTextEditor, new Range(position, position.translate(0, -1)));
 		}
-	}, triggerChar ? triggerChar : '.');
+	}, triggerChar);
 
 	const Cpp_provider = languages.registerCompletionItemProvider('cpp', {
 		async provideCompletionItems(document, position) {
 			return await createCompletitions(window.activeTextEditor, new Range(position, position.translate(0, -1)));
 		}
-	}, triggerChar ? triggerChar : '.');
+	}, triggerChar);
 
 	context.subscriptions.push(commands.registerCommand('extension.writeimplfile', writeimplfile));
 	context.subscriptions.push(commands.registerCommand('extension.parsemainfile', parsemainfile));

@@ -29,22 +29,21 @@ function activate(context) {
         console.log('C/C++ autocomplete is running');
         readSettings();
         pathSeparationToken = process.platform == 'win32' ? '\\' : '/';
-        if (vscode_1.workspace.workspaceFolders)
-            console.log(vscode_1.workspace.workspaceFolders[0].uri.path);
+        triggerChar = triggerChar ? triggerChar : '.';
         const C_provider = vscode_1.languages.registerCompletionItemProvider('c', {
             provideCompletionItems(document, position) {
                 return __awaiter(this, void 0, void 0, function* () {
                     return yield createCompletitions(vscode_1.window.activeTextEditor, new vscode_1.Range(position, position.translate(0, -1)));
                 });
             }
-        }, triggerChar ? triggerChar : '.');
+        }, triggerChar);
         const Cpp_provider = vscode_1.languages.registerCompletionItemProvider('cpp', {
             provideCompletionItems(document, position) {
                 return __awaiter(this, void 0, void 0, function* () {
                     return yield createCompletitions(vscode_1.window.activeTextEditor, new vscode_1.Range(position, position.translate(0, -1)));
                 });
             }
-        }, triggerChar ? triggerChar : '.');
+        }, triggerChar);
         context.subscriptions.push(vscode_1.commands.registerCommand('extension.writeimplfile', writeimplfile));
         context.subscriptions.push(vscode_1.commands.registerCommand('extension.parsemainfile', parsemainfile));
         context.subscriptions.push(C_provider, Cpp_provider);
