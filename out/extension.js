@@ -15,6 +15,7 @@ var indentStyle;
 var columnNumber;
 var triggerChar;
 var headersFolder;
+var pathSeparationToken;
 function readSettings() {
     indentStyle = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
     columnNumber = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('columnNumber');
@@ -27,6 +28,9 @@ function activate(context) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('C/C++ autocomplete is running');
         readSettings();
+        pathSeparationToken = process.platform == 'win32' ? '\\' : '/';
+        if (vscode_1.workspace.workspaceFolders)
+            console.log(vscode_1.workspace.workspaceFolders[0].uri.path);
         const C_provider = vscode_1.languages.registerCompletionItemProvider('c', {
             provideCompletionItems(document, position) {
                 return __awaiter(this, void 0, void 0, function* () {
@@ -51,7 +55,7 @@ function writeimplfile() {
     let editor = vscode_1.window.activeTextEditor;
     if (editor) {
         let document = editor.document;
-        let fileName = document.fileName.split(process.platform === 'win32' ? '\\' : '/')[document.fileName.split(process.platform === 'win32' ? '\\' : '/').length - 1];
+        let fileName = document.fileName.split(pathSeparationToken)[document.fileName.split(process.platform === 'win32' ? '\\' : '/').length - 1];
         if (document.fileName.endsWith('.h')) {
             let text = document.getText();
             let h = new parse_1.header();
@@ -137,36 +141,20 @@ function createCompletitions(editor, deleteRange) {
                 }
                 else {
                     //open the header file and create completitions
-                    let pathToHeader = '';
-                    pathToHeader = doc.fileName.replace(doc.fileName.endsWith('.c') ? '.c' : '.cpp', '.h');
-                    console.log(pathToHeader);
-                    if (headersFolder != null) {
-                        pathToHeader = addHeadersFolderToPath(pathToHeader, headersFolder);
-                        console.log('path modificato');
+                    let pathToHeader = vscode_1.workspace.workspaceFolders ? vscode_1.workspace.workspaceFolders[0].uri.path : null;
+                    if (headersFolder != null && pathToHeader != null) {
+                        let temp = doc.fileName.split(pathSeparationToken);
+                        let headerFileName = temp[temp.length - 1].replace(/\.(c|cpp)$/, '.h');
+                        pathToHeader += pathSeparationToken + headersFolder + pathSeparationToken + headerFileName;
+                        let headerUri = vscode_1.Uri.file(pathToHeader);
+                        let fileContent = yield vscode_1.workspace.fs.readFile(headerUri);
+                        completitions = parseAndCreateCompletitions(fileContent.toString(), deleteRange);
                     }
-                    console.log(headersFolder);
-                    console.log(pathToHeader);
-                    let headerUri = vscode_1.Uri.file(pathToHeader);
-                    let fileContent = yield vscode_1.workspace.fs.readFile(headerUri);
-                    completitions = parseAndCreateCompletitions(fileContent.toString(), deleteRange);
                 }
             }
         }
         return completitions;
     });
-}
-function addHeadersFolderToPath(path, headersFolder) {
-    let separationToken = process.platform == 'win32' ? '\\' : '/';
-    if (separationToken == '\\') {
-        headersFolder = headersFolder.replace('/', '\\');
-    }
-    let temp = path.split(separationToken);
-    path = '';
-    temp[temp.length - 2] += separationToken + headersFolder;
-    temp.forEach(el => {
-        path += el + separationToken;
-    });
-    return path.slice(0, path.length - 1);
 }
 function openImplementationFile(fileContent, fileLanguage) {
     return __awaiter(this, void 0, void 0, function* () {
