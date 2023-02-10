@@ -1,2 +1,6 @@
+# node folders
 node_modules/
 out/
+
+# vsce binaries
+*.vsix
