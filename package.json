@@ -51,12 +51,17 @@
 					"description": "choose the indentation style"
 				},
 				"autocomplete-c-cpp-files.triggerChar": {
-					"type": ["string"],
+					"type": [
+						"string"
+					],
 					"default": ".",
 					"description": "char to write to trigger the completition"
 				},
 				"autocomplete-c-cpp-files.headersFolder": {
-					"type": ["string", "null"],
+					"type": [
+						"string",
+						"null"
+					],
 					"default": null,
 					"description": "foldername of the headers files default is the root folder of your workspaces"
 				}
@@ -90,10 +95,10 @@
 		"@types/node": "^10.12.21",
 		"@types/vscode": "^1.43.0",
 		"glob": "^7.1.4",
+		"lodash": ">=4.17.21",
 		"mocha": "^10.2.0",
-		"typescript": "^3.3.1",
 		"tslint": "^5.12.1",
-		"vscode-test": "^1.0.2",
-		"lodash": ">=4.17.21"
+		"typescript": "^3.3.1",
+		"vscode-test": "^1.0.2"
 	}
 }

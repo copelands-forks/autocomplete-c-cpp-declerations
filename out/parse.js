@@ -34,32 +34,42 @@ function parse(fileContent) {
             commentBlock = temp.includes('*/') ? false : commentBlock;
         }
         else {
-            if (lineHasOpenBracket(temp)) {
-                bracketsCount++;
-            }
-            if (lineHasCloseBracket(temp)) {
-                bracketsCount--;
-            }
-            if (lineIsMain(temp)) {
-                i = arrayFileContent.length;
-            }
-            if (lineIsInclude(temp)) {
-                h.includes.push(temp);
-            }
-            if (lineIsMethodSignature(temp)) {
-                if (bracketsCount == 0 || (bracketsCount == 1 && h.namespace)) {
-                    h.methods.push(formatMethodsignature(temp.split(';')[0], undefined));
+            if (bracketsCount < 1 || (bracketsCount < 2 && h.namespace)) {
+                if (lineHasOpenBracket(temp)) {
+                    bracketsCount++;
                 }
-                else {
-                    h.methods.push(formatMethodsignature(temp.split(';')[0], h.class));
+                if (lineHasCloseBracket(temp)) {
+                    bracketsCount--;
+                }
+                if (lineIsMain(temp)) {
+                    i = arrayFileContent.length;
+                }
+                if (lineIsInclude(temp)) {
+                    h.includes.push(temp);
+                }
+                if (lineIsMethodSignature(temp)) {
+                    if (bracketsCount == 0 || (bracketsCount == 1 && h.namespace)) {
+                        h.methods.push(formatMethodsignature(temp.split(';')[0], undefined));
+                    }
+                    else {
+                        h.methods.push(formatMethodsignature(temp.split(';')[0], h.class));
+                    }
+                }
+                if (lineIsClass(temp)) {
+                    h.class = temp.split(' ')[1].trim();
+                }
+                if (lineIsNamespace(temp)) {
+                    temp += temp.includes('{') ? '' : '{';
+                    h.namespace = temp;
                 }
             }
-            if (lineIsClass(temp)) {
-                h.class = temp.split(' ')[1].trim();
-            }
-            if (lineIsNamespace(temp)) {
-                temp += temp.includes('{') ? '' : '{';
-                h.namespace = temp;
+            else {
+                if (lineHasOpenBracket(temp)) {
+                    bracketsCount++;
+                }
+                if (lineHasCloseBracket(temp)) {
+                    bracketsCount--;
+                }
             }
         }
     }
