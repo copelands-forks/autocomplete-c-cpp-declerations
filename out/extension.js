@@ -55,7 +55,7 @@ function writeimplfile() {
     if (editor) {
         let document = editor.document;
         let fileName = document.fileName.split(pathSeparationToken)[document.fileName.split(process.platform === 'win32' ? '\\' : '/').length - 1];
-        if (document.fileName.endsWith('.h')) {
+        if (document.fileName.endsWith('.h') || document.fileName.endsWith('hpp')) {
             let text = document.getText();
             let h = new parse_1.header();
             let language = document.languageId;
@@ -89,7 +89,7 @@ function parsemainfile() {
     let editor = vscode_1.window.activeTextEditor;
     if (editor) {
         let document = editor.document;
-        if (document.fileName.endsWith('.c') || document.fileName.endsWith('cpp')) {
+        if (document.fileName.endsWith('.c') || document.fileName.endsWith('cpp') || document.fileName.endsWith('cc')) {
             let text = document.getText();
             let h = new parse_1.header();
             h = parse_1.parse(text);
@@ -133,7 +133,7 @@ function createCompletitions(editor, deleteRange) {
         if (editor) {
             let doc = editor.document;
             let lines = editor.document.getText();
-            if (doc.fileName.endsWith('.c') || doc.fileName.endsWith('.cpp')) {
+            if (doc.fileName.endsWith('.c') || doc.fileName.endsWith('.cpp') || doc.fileName.endsWith('cc')) {
                 if (parse_1.fileIsMain(lines.split('\n'))) {
                     //create completitions
                     completitions = parseAndCreateCompletitions(lines, deleteRange);

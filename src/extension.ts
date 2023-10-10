@@ -46,7 +46,7 @@ function writeimplfile(): void {
 	if(editor){
 		let document = editor.document;
 		let fileName = document.fileName.split(pathSeparationToken)[document.fileName.split(process.platform === 'win32' ? '\\' : '/').length - 1];
-		if(document.fileName.endsWith('.h')){
+		if(document.fileName.endsWith('.h') || document.fileName.endsWith('hpp')){
 			let text = document.getText();
 			let h: header = new header();
 			let language: string = document.languageId;
@@ -82,7 +82,7 @@ function parsemainfile(): void {
 	let editor = window.activeTextEditor;
 	if(editor){
 		let document = editor.document;
-		if(document.fileName.endsWith('.c') || document.fileName.endsWith('cpp')){
+		if(document.fileName.endsWith('.c') || document.fileName.endsWith('cpp') || document.fileName.endsWith('cc')){
 			let text = document.getText();
 			let h: header = new header();
 
@@ -128,7 +128,7 @@ async function createCompletitions(editor: TextEditor | undefined, deleteRange: 
 	if(editor){
 		let doc = editor.document;
 		let lines = editor.document.getText();
-		if(doc.fileName.endsWith('.c') || doc.fileName.endsWith('.cpp')){
+		if(doc.fileName.endsWith('.c') || doc.fileName.endsWith('.cpp') || doc.fileName.endsWith('cc')){
 			if(fileIsMain(lines.split('\n'))){
 				//create completitions
 				completitions = parseAndCreateCompletitions(lines, deleteRange);
