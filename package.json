@@ -2,7 +2,7 @@
 	"name": "autocomplete-c-cpp-files",
 	"displayName": "Autocomplete C/C++ files",
 	"description": "This extension will write the implementation of your C/C++ code without make you copy and paste like an idiot",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"engines": {
 		"vscode": "^1.43.0"
 	},
@@ -100,5 +100,16 @@
 		"tslint": "^5.12.1",
 		"typescript": "^3.3.1",
 		"vscode-test": "^1.0.2"
+	},
+	"__metadata": {
+		"id": "72a8cca5-32e6-469d-a1b0-43b61d0e8863",
+		"publisherId": "b3c80a9b-0db9-4af1-bfa3-9de5a5def821",
+		"publisherDisplayName": "SteveSevetS",
+		"targetPlatform": "undefined",
+		"updated": false,
+		"isPreReleaseVersion": false,
+		"installedTimestamp": 1704254277663,
+		"pinned": false,
+		"preRelease": false
 	}
 }

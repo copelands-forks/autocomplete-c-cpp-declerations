@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.fileIsMain = exports.indent = exports.parse = exports.header = void 0;
 /**
  * defines a .c or .cpp header that defines
  * @field namespace is the namespace name
@@ -14,6 +15,9 @@ class header {
     }
 }
 exports.header = header;
+class Namespace {
+}
+;
 /**
  * parses the C/C++ header file
  * @param fileContent string that contains the file content divided by \n
@@ -25,8 +29,48 @@ function parse(fileContent) {
     let bracketsCount = 0; //cout the number of { } to dertermine if a class ends
     let arrayFileContent = fileContent.split('\n');
     let temp;
-    for (let i = 0; i < arrayFileContent.length; i++) {
-        temp = arrayFileContent[i].trimLeft();
+    // copleands -- implementation to avoid reading inside of functions
+    let result;
+    let i;
+    let namespace = new Namespace;
+    let optimal_lineReads = (arrayFile) => {
+        result = arrayFile[i].trimLeft();
+        if (lineIsNamespace(result)) {
+            namespace.name = result.split(' ')[1] + '::';
+            namespace.inside = 1;
+        }
+        // check if we are a inside function
+        if (result.match(/\)\{\s*$/)) {
+            let outside_function = 0;
+            while (i < arrayFile.length && !outside_function) { // i kinda forgot how to use javascript lol a while loop will do
+                i++;
+                let leavefunction = arrayFile[i].trimLeft();
+                if (leavefunction.includes('){') || leavefunction.includes(')') && arrayFile[2 + i + leavefunction.length] == '{') {
+                    //  inside conditions and lambda ignore them 
+                    outside_function = -1;
+                }
+                else if (outside_function == -1) {
+                    // conditions and lambda  exits
+                    outside_function = (leavefunction.includes('}')) ? 0 : -1;
+                }
+                else {
+                    if (!leavefunction.includes('};') && leavefunction.includes("}")) {
+                        result = arrayFile[i].trimLeft();
+                        outside_function = 1;
+                    }
+                }
+            }
+        }
+        else if (namespace.inside == 1) { // disable namespace as an addition to function snippets
+            if (result.includes('}')) {
+                namespace.inside = 0;
+            }
+            // ... 
+        }
+        return result;
+    };
+    for (i = 0; i < arrayFileContent.length; i++) {
+        temp = optimal_lineReads(arrayFileContent);
         if (lineIsComment(temp)) {
             commentBlock = temp.startsWith('/*') ? true : commentBlock;
         }
@@ -41,17 +85,16 @@ function parse(fileContent) {
                 if (lineHasCloseBracket(temp)) {
                     bracketsCount--;
                 }
-                if (lineIsMain(temp)) {
-                    i = arrayFileContent.length;
-                }
                 if (lineIsInclude(temp)) {
                     h.includes.push(temp);
                 }
-                if (lineIsMethodSignature(temp)) {
+                if (lineIsMethodSignature(temp, bracketsCount)) {
                     if (bracketsCount == 0 || (bracketsCount == 1 && h.namespace)) {
+                        temp = addNamespace(temp, namespace);
                         h.methods.push(formatMethodsignature(temp.split(';')[0], undefined));
                     }
                     else {
+                        temp = addNamespace(temp, namespace);
                         h.methods.push(formatMethodsignature(temp.split(';')[0], h.class));
                     }
                 }
@@ -128,20 +171,44 @@ exports.fileIsMain = fileIsMain;
 function lineIsInclude(line) {
     return line.startsWith('#include');
 }
-function lineIsMethodSignature(line) {
-    return line.includes(');') && !(line.startsWith('typedef'));
+function lineIsMethodSignature(line, insideBracket) {
+    let result = line.includes(');') && !(line.startsWith('typedef'));
+    let shit = line.split(' ');
+    if (shit.length == 1) {
+        result = false;
+    }
+    else if (line[shit[0].length] != ' ') {
+        result = false;
+    }
+    return result;
 }
-function lineIsClass(line) {
-    return line.startsWith('class');
+function addNamespace(line, namespace) {
+    let result = '';
+    if (namespace.inside) {
+        let format = line.split(' ');
+        result += format[0], result += ` ${namespace.name}`;
+        let seperate = format.slice(1).join(' ');
+        result += seperate;
+    }
+    else {
+        result = line;
+    }
+    return result;
 }
 function lineIsNamespace(line) {
     return line.startsWith('namespace');
+}
+function lineIsClass(line) {
+    return line.startsWith('class');
 }
 function lineIsComment(line) {
     return line.startsWith('/*') || line.startsWith('//') || line.startsWith('*');
 }
 function lineIsMain(line) {
-    return line.includes('main');
+    var res = line.includes('main');
+    if (res)
+        console.log(res);
+    return res;
 }
 function lineHasOpenBracket(line) {
     return line.includes('{');

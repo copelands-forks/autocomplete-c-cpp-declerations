@@ -14,6 +14,16 @@ function readSettings(): void {
 	triggerChar = workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
 	headersFolder = workspace.getConfiguration('autocomplete-c-cpp-files').get('headersFolder');
 }
+import { CompletionItemProvider, TextDocument, Position, CancellationToken, CompletionItem, CompletionList } from 'vscode';
+
+ 
+function isTriggerCharValid(document: TextDocument, position: Position): boolean {
+    const lineText = document.lineAt(position.line).text;
+    const prefix = lineText.substring(0, position.character);
+    //const isValidContext = !prb|\.\w*$/); actually stupid
+    return (lineText.startsWith('.')) ?  true:false ;
+  }
+
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -25,15 +35,25 @@ export async function activate(context: ExtensionContext) {
 
 	const C_provider = languages.registerCompletionItemProvider('c', {
 		async provideCompletionItems(document, position) {
-			return await createCompletitions(window.activeTextEditor, new Range(position, position.translate(0, -1)));
+		  if(isTriggerCharValid(document, position)){
+        return await createCompletitions(window.activeTextEditor, new Range(position, position.translate(0, -1)));
+		  }
+      return []
+      
 		}
 	}, triggerChar);
-
+  
 	const Cpp_provider = languages.registerCompletionItemProvider('cpp', {
-		async provideCompletionItems(document, position) {
-			return await createCompletitions(window.activeTextEditor, new Range(position, position.translate(0, -1)));
+    async provideCompletionItems(document, position) {
+      if(isTriggerCharValid(document, position)){
+        return await createCompletitions(window.activeTextEditor, new Range(position, position.translate(0, -1)));
+      }
+      return []
 		}
+    
 	}, triggerChar);
+	
+   
 
 	context.subscriptions.push(commands.registerCommand('extension.writeimplfile', writeimplfile));
 	context.subscriptions.push(commands.registerCommand('extension.parsemainfile', parsemainfile));
@@ -119,7 +139,7 @@ function parseAndCreateCompletitions(fileContent: string, deleteRange: Range): C
 		namespaceCompletition.additionalTextEdits = [TextEdit.delete(deleteRange)];
 		completitions.push(namespaceCompletition);
 	}
-	return completitions;
+return completitions;
 }
 
 async function createCompletitions(editor: TextEditor | undefined, deleteRange: Range) : Promise<CompletionItem[]> {
@@ -128,7 +148,7 @@ async function createCompletitions(editor: TextEditor | undefined, deleteRange: 
 	if(editor){
 		let doc = editor.document;
 		let lines = editor.document.getText();
-		if(doc.fileName.endsWith('.c') || doc.fileName.endsWith('.cpp') || doc.fileName.endsWith('cc')){
+		if(doc.fileName.endsWith('.c') || doc.fileName.endsWith('.hpp') || doc.fileName.endsWith('.h') || doc.fileName.endsWith('.cpp') || doc.fileName.endsWith('cc')){
 			if(fileIsMain(lines.split('\n'))){
 				//create completitions
 				completitions = parseAndCreateCompletitions(lines, deleteRange);
@@ -145,6 +165,14 @@ async function createCompletitions(editor: TextEditor | undefined, deleteRange: 
 				}
 			}
 		}
+	}
+	if(completitions.length) {
+	  console.log(completitions.toString() + "\n completions");
+	  completitions.forEach((Completion: string ,a, self )=>{
+      console.log(Completion.label);
+    });
+    
+    console.log(" end: ..... completions");
 	}
 	return completitions;
 }

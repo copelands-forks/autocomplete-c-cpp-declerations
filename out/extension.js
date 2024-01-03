@@ -1,13 +1,15 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.deactivate = exports.activate = void 0;
 const vscode_1 = require("vscode"); //import vscode classes and workspace
 const parse_1 = require("./parse"); //import parse functions and class
 //settings
@@ -22,6 +24,12 @@ function readSettings() {
     triggerChar = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
     headersFolder = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('headersFolder');
 }
+function isTriggerCharValid(document, position) {
+    const lineText = document.lineAt(position.line).text;
+    const prefix = lineText.substring(0, position.character);
+    //const isValidContext = !prb|\.\w*$/); actually stupid
+    return (lineText.startsWith('.')) ? true : false;
+}
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
@@ -33,14 +41,20 @@ function activate(context) {
         const C_provider = vscode_1.languages.registerCompletionItemProvider('c', {
             provideCompletionItems(document, position) {
                 return __awaiter(this, void 0, void 0, function* () {
-                    return yield createCompletitions(vscode_1.window.activeTextEditor, new vscode_1.Range(position, position.translate(0, -1)));
+                    if (isTriggerCharValid(document, position)) {
+                        return yield createCompletitions(vscode_1.window.activeTextEditor, new vscode_1.Range(position, position.translate(0, -1)));
+                    }
+                    return [];
                 });
             }
         }, triggerChar);
         const Cpp_provider = vscode_1.languages.registerCompletionItemProvider('cpp', {
             provideCompletionItems(document, position) {
                 return __awaiter(this, void 0, void 0, function* () {
-                    return yield createCompletitions(vscode_1.window.activeTextEditor, new vscode_1.Range(position, position.translate(0, -1)));
+                    if (isTriggerCharValid(document, position)) {
+                        return yield createCompletitions(vscode_1.window.activeTextEditor, new vscode_1.Range(position, position.translate(0, -1)));
+                    }
+                    return [];
                 });
             }
         }, triggerChar);
@@ -59,7 +73,7 @@ function writeimplfile() {
             let text = document.getText();
             let h = new parse_1.header();
             let language = document.languageId;
-            h = parse_1.parse(text);
+            h = (0, parse_1.parse)(text);
             let parsedFileContent = '';
             for (let i = 0; i < h.includes.length; i++) {
                 parsedFileContent += h.includes[i] ? `${h.includes[i]}\n` : '';
@@ -68,10 +82,10 @@ function writeimplfile() {
             parsedFileContent += h.namespace ? `\n${h.namespace}` : '';
             for (let i = 0; i < h.methods.length; i++) {
                 if (h.namespace) {
-                    parsedFileContent += parse_1.indent(h.methods[i], indentStyle, true);
+                    parsedFileContent += (0, parse_1.indent)(h.methods[i], indentStyle, true);
                 }
                 else {
-                    parsedFileContent += parse_1.indent(h.methods[i], indentStyle, false);
+                    parsedFileContent += (0, parse_1.indent)(h.methods[i], indentStyle, false);
                 }
             }
             parsedFileContent += h.namespace ? '}' : '';
@@ -92,11 +106,11 @@ function parsemainfile() {
         if (document.fileName.endsWith('.c') || document.fileName.endsWith('cpp') || document.fileName.endsWith('cc')) {
             let text = document.getText();
             let h = new parse_1.header();
-            h = parse_1.parse(text);
+            h = (0, parse_1.parse)(text);
             let parsedFileContent = '';
             parsedFileContent += h.namespace ? `\n${h.namespace}` : '';
             for (let i = 0; i < h.methods.length; i++) {
-                parsedFileContent += parse_1.indent(h.methods[i], indentStyle, h.namespace ? true : false);
+                parsedFileContent += (0, parse_1.indent)(h.methods[i], indentStyle, h.namespace ? true : false);
             }
             parsedFileContent += h.namespace ? '}' : '';
             editor.edit(editBuilder => editBuilder.insert(new vscode_1.Position(document.lineCount + 2, 0), '\n' + parsedFileContent));
@@ -113,7 +127,7 @@ function parsemainfile() {
 function parseAndCreateCompletitions(fileContent, deleteRange) {
     let h = new parse_1.header();
     let completitions = [];
-    h = parse_1.parse(fileContent);
+    h = (0, parse_1.parse)(fileContent);
     h.methods.forEach(el => {
         let completition = new vscode_1.CompletionItem(el);
         completition.additionalTextEdits = [vscode_1.TextEdit.delete(deleteRange)];
@@ -133,8 +147,8 @@ function createCompletitions(editor, deleteRange) {
         if (editor) {
             let doc = editor.document;
             let lines = editor.document.getText();
-            if (doc.fileName.endsWith('.c') || doc.fileName.endsWith('.cpp') || doc.fileName.endsWith('cc')) {
-                if (parse_1.fileIsMain(lines.split('\n'))) {
+            if (doc.fileName.endsWith('.c') || doc.fileName.endsWith('.hpp') || doc.fileName.endsWith('.h') || doc.fileName.endsWith('.cpp') || doc.fileName.endsWith('cc')) {
+                if ((0, parse_1.fileIsMain)(lines.split('\n'))) {
                     //create completitions
                     completitions = parseAndCreateCompletitions(lines, deleteRange);
                 }
@@ -151,6 +165,13 @@ function createCompletitions(editor, deleteRange) {
                     }
                 }
             }
+        }
+        if (completitions.length) {
+            console.log(completitions.toString() + "\n completions");
+            completitions.forEach((Completion, a, self) => {
+                console.log(Completion.label);
+            });
+            console.log(" end: ..... completions");
         }
         return completitions;
     });
