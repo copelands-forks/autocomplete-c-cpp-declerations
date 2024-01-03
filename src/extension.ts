@@ -16,14 +16,12 @@ function readSettings(): void {
 }
 import { CompletionItemProvider, TextDocument, Position, CancellationToken, CompletionItem, CompletionList } from 'vscode';
 
- 
 function isTriggerCharValid(document: TextDocument, position: Position): boolean {
-    const lineText = document.lineAt(position.line).text;
-    const prefix = lineText.substring(0, position.character);
-    //const isValidContext = !prb|\.\w*$/); actually stupid
-    return (lineText.startsWith('.')) ?  true:false ;
-  }
-
+  const lineText = document.lineAt(position.line).text;
+  const prefix = lineText.substring(0, position.character);
+  //const isValidContext = !prb|\.\w*$/); actually stupid
+  return /\.\s*/.test(lineText);
+}
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
