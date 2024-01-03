@@ -6,6 +6,7 @@ this is a fork of [SteveSevetS](https://github.com/SteveSevetS/autocomplete-c-cp
 
   I intend to make some changes to the source code that allows header autocompletion as well as make it convenient for large scale c++ projects.
 
-Feel free to contribute to this project by submitting a pull request [here](https://github.com/SteveSevetS/autocomplete-c-cpp-files/)
+Feel free to contribute to the original project by submitting a pull request [here](https://github.com/SteveSevetS/autocomplete-c-cpp-files/),
+or this fork.
 
  
