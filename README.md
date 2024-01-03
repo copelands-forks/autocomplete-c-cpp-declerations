@@ -6,7 +6,7 @@ Auto Complete Declerations! C/C==
   
   Features : 
     - Trigger auto complete is not limited to single .cpp files where main is enabled,
-      it works across all files now. including .h for all those header-only coders.
+    - it works across all files now. including .h for all those header-only coders.
     
     - trigger key function decleration snippets include the actual namespaces now! 
       
