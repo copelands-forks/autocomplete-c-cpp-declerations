@@ -14,7 +14,9 @@ Auto Complete Declerations! C/C==
       
     
   Fixes :  
+  
     -namespace issue, 
+    
     -trigger key "." annoyance
 
 
