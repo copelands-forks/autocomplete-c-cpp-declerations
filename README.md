@@ -31,5 +31,5 @@
     - parser algorithm now avoids running through defined code inside of functions and just looks for declerations.
 
 
-contribute to this repo through pull requests over [here](https://github.com/copelands-forks/autocomplete-c-cpp-declerations/)
+contribute to this repo through pull requests or report issues  over [here](https://github.com/copelands-forks/autocomplete-c-cpp-declerations/)
 
