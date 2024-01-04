@@ -17,17 +17,15 @@ class header {
 exports.header = header;
 class Namespace {
     constructor() {
-        this.Names = '';
+        this.Names = [];
         this.encapsulated = 0;
-        this.is_Nested = false;
     }
 }
 ;
 class objFunction {
     constructor() {
-        this.Name = '';
+        this.ignore_implements = "$";
         this.encapsulated = 0;
-        this.inside_code = false;
     }
 }
 ;
@@ -37,13 +35,20 @@ class objFileTracker {
         this.array = [];
     }
     reached_limit() {
-        if (this.index > this.array.length)
+        if (this.index + 1 >= this.array.length) {
+            return true;
+        }
+        else
             return false;
-        return true;
     }
     next_word() {
-        this.index++;
-        return this.array[this.index];
+        if (!this.reached_limit()) {
+            this.index++;
+            return this.array[this.index];
+        }
+        else {
+            return this.array[this.index];
+        }
     }
     previous_word() {
         this.index--;
@@ -55,21 +60,21 @@ class objFileTracker {
 }
 class ObjCoreParser {
 }
-var coreParser;
+var coreParser = new ObjCoreParser();
 const debug_log = true;
 const log = (Message) => {
     if (debug_log)
         console.log(Message);
 };
 const Codepat = {
-    enter_conditions_KnR: /)\s*{/,
+    enter_conditions_KnR: /\)\s*{/,
     enter_conditions_Allman: /\s*{/,
     enter_lambdaFunction_Allman: /\s*{/,
-    enter_lambdaFunction_KnR: /)\s*{/,
+    enter_lambdaFunction_KnR: /\)\s*{/,
     exit_condition_lambda: /(\s}\s)|(\s};)/,
 };
 const patterns = {
-    enter_Function_KnR: /)\s*/,
+    enter_Function_KnR: /\){\s*/,
     enter_Function_Allman: /\s*{/,
     exit_function: /\s*}\s*/,
     code: Codepat
@@ -77,45 +82,57 @@ const patterns = {
 const Skip_Function_Code = () => {
     let func = coreParser.function;
     var file = coreParser.file;
-    if ((file === null || file === void 0 ? void 0 : file.reached_limit()) && func.encapsulated < 0) { // i kinda forgot how to use javascript lol a while loop will do
-        let line_current = file === null || file === void 0 ? void 0 : file.current_word();
+    if (!(file === null || file === void 0 ? void 0 : file.reached_limit()) && func.encapsulated < 0) { // skip function code 
         let line_next = file === null || file === void 0 ? void 0 : file.next_word();
+        let line_current = line_next;
         //  inside conditions and lambda ignore them 
-        if (line_current.match(patterns.code.enter_conditions_KnR) || line_current.match(patterns.code.enter_conditions_Allman)) {
+        if (line_current.match(patterns.code.enter_conditions_KnR) || line_next.match(patterns.code.enter_conditions_Allman)) {
             log("entered lambda/condition");
             func.encapsulated--;
             func.inside_code = true;
         }
-        // exiting conditions and lambda functions
-        else if (func.inside_code && line_current.match(patterns.code.exit_condition_lambda)) {
+        // exiting conditions|lambda|functions
+        else if (func.inside_code && line_current.match(patterns.code.exit_condition_lambda) ||
+            line_current.match(patterns.exit_function)) {
             func.encapsulated++;
-            if (func.encapsulated == 0) {
-                func.inside_code = false;
-                log("left function");
-            }
-            else {
-                log("left lambda/condition");
-            }
+            log("left lambda/condition");
         }
-        if (func.inside_code == false) {
+        if (func.encapsulated == 0) {
+            func.inside_code = false;
+            file.next_word();
+            log("left function");
+        }
+        else if (func.inside_code == true) {
             Skip_Function_Code();
         }
     }
 };
 const optimalRead = () => {
-    var _a;
-    let result = (_a = coreParser.file) === null || _a === void 0 ? void 0 : _a.current_word();
+    var _a, _b, _c, _d, _e;
+    let result = (_a = coreParser.file) === null || _a === void 0 ? void 0 : _a.next_word();
     let namespace = coreParser.namespace;
-    if (lineIsNamespace(result)) {
-        namespace.Names = result.split(' ')[1] + '::';
+    if (result.match(/namespace/)) {
+        result = result.replace(/^\s*namespace/, 'namespace');
+        let keyname = "";
+        keyname += result.split(' ')[1] + '::';
+        namespace.Names.push(keyname);
         namespace.encapsulated++;
+        namespace.is_Nested = true;
     }
     else if (result.match(patterns.enter_Function_Allman) || (result === null || result === void 0 ? void 0 : result.match(patterns.enter_Function_KnR))) {
+        (_b = coreParser.function) === null || _b === void 0 ? void 0 : _b.ignore_implements += result.replace(/{/, " ").replace(/\s^/, "");
+        (_c = coreParser.function) === null || _c === void 0 ? void 0 : _c.encapsulated = -1;
+        (_d = coreParser.function) === null || _d === void 0 ? void 0 : _d.inside_code = true;
         Skip_Function_Code();
+        result = (_e = coreParser.file) === null || _e === void 0 ? void 0 : _e.current_word();
     }
     else if (namespace.encapsulated > 0 && result.includes('}')) { // disable namespace as an addition to function snippets
-        namespace.encapsulated++;
+        namespace.encapsulated--;
+        if (namespace.encapsulated != 1)
+            namespace.Names.pop();
         // ... 
+    }
+    else {
     }
     return result;
 };
@@ -136,8 +153,13 @@ function parse(fileContent) {
     coreParser.namespace = new Namespace;
     coreParser.function = new objFunction;
     coreParser.file = new objFileTracker;
+    coreParser.file.array = arrayFileContent;
     let namespace = coreParser.namespace;
+    namespace.is_Nested = false;
     while (!coreParser.file.reached_limit()) {
+        if (coreParser.file.index == 15) {
+            log("wtf");
+        }
         temp = optimalRead();
         if (lineIsComment(temp)) {
             commentBlock = temp.startsWith('/*') ? true : commentBlock;
@@ -182,6 +204,13 @@ function parse(fileContent) {
                     bracketsCount--;
                 }
             }
+        }
+    }
+    for (let methods in h.methods) {
+        if (coreParser.function.ignore_implements.includes(h.methods[methods])) {
+            log("wtf");
+            let num = +methods;
+            h.methods.splice(num, 1);
         }
     }
     return h;
@@ -252,9 +281,11 @@ function lineIsMethodSignature(line, insideBracket) {
 }
 function addNamespace(line, namespace) {
     let result = '';
-    if (namespace.is_Nested) {
+    if (coreParser.namespace.is_Nested) {
+        line = line.replace(/^\s*/, "");
         let format = line.split(' ');
-        result += format[0], result += ` ${namespace.Names}`;
+        let name = coreParser.namespace.Names.toString().replace(/,/, "");
+        result += format[0], result += ` ${name}`;
         let seperate = format.slice(1).join(' ');
         result += seperate;
     }

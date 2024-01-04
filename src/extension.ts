@@ -147,7 +147,7 @@ async function createCompletitions(editor: TextEditor | undefined, deleteRange: 
 		let doc = editor.document;
 		let lines = editor.document.getText();
 		if(doc.fileName.endsWith('.c') || doc.fileName.endsWith('.hpp') || doc.fileName.endsWith('.h') || doc.fileName.endsWith('.cpp') || doc.fileName.endsWith('cc')){
-			if(fileIsMain(lines.split('\n'))){
+			if(true){
 				//create completitions
 				completitions = parseAndCreateCompletitions(lines, deleteRange);
 			} else {

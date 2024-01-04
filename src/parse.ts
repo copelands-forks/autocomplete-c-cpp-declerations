@@ -13,15 +13,17 @@ export class header {
 }
 
 class Namespace {
-  Names:string=''
+  Names:string[]=[];
+
   encapsulated:number=0;
-  is_Nested:boolean=false;
+  is_Nested?:boolean;
   
 };
 class objFunction {
-  Name:string='';
+  Name?:string;
+  ignore_implements:string="$"
   encapsulated:number=0;
-  inside_code:boolean=false;
+  inside_code?:boolean;
 };
 class objFileTracker {
   
@@ -29,11 +31,14 @@ class objFileTracker {
   array:string[]=[];
   
   reached_limit () : boolean {
-      if(this.index > this.array.length) return false;
-      return true;
+      if(this.index + 1 >= this.array.length){ 
+          return true;
+      }
+      else return false;
   }
   next_word() : string {
-    this.index++; return this.array[this.index];
+    if(!this.reached_limit()) {this.index++; return this.array[this.index];}
+    else { return this.array[this.index]; }
   }
   previous_word() : string {
     this.index--; return this.array[this.index];
@@ -48,7 +53,7 @@ class ObjCoreParser {
     file?:objFileTracker;
 }
     
-var coreParser : ObjCoreParser;     
+var coreParser: ObjCoreParser = new ObjCoreParser();
 
 const debug_log = true;
 
@@ -58,15 +63,15 @@ const log = (Message : string)=>{
   
   
 const Codepat = {
-  enter_conditions_KnR: /)\s*{/,
+  enter_conditions_KnR: /\)\s*{/,
   enter_conditions_Allman: /\s*{/,
   enter_lambdaFunction_Allman: /\s*{/,
-  enter_lambdaFunction_KnR: /)\s*{/,
+  enter_lambdaFunction_KnR: /\)\s*{/,
   
   exit_condition_lambda: /(\s}\s)|(\s};)/,
 };
 const patterns = {
-  enter_Function_KnR : /)\s*/,
+  enter_Function_KnR : /\){\s*/,
   enter_Function_Allman: /\s*{/,
   exit_function: /\s*}\s*/,
   
@@ -74,62 +79,76 @@ const patterns = {
 };
   
   
-    
   
-  
-  
-
 const Skip_Function_Code=():void =>  {
   let func = coreParser.function!;
   var file = coreParser.file!;
   
-    if(file?.reached_limit() && func.encapsulated < 0 ){ // i kinda forgot how to use javascript lol a while loop will do
-      let line_current = file?.current_word();
-      let line_next = file?.next_word();
+    if(!file?.reached_limit() && func.encapsulated < 0 ){ // skip function code 
+      let line_next = file?.next_word(); 
+      let line_current = line_next;
     
       //  inside conditions and lambda ignore them 
-      if(line_current.match(patterns.code.enter_conditions_KnR)   || line_current.match(patterns.code.enter_conditions_Allman)){        
+      if(line_current.match(patterns.code.enter_conditions_KnR)   || line_next.match(patterns.code.enter_conditions_Allman)){        
         log("entered lambda/condition")
         func.encapsulated--; 
         func.inside_code=true;
       }
-      // exiting conditions and lambda functions
-      else if(func.inside_code  && line_current.match(patterns.code.exit_condition_lambda )){ 
+      // exiting conditions|lambda|functions
+      else if(func.inside_code  && line_current.match(patterns.code.exit_condition_lambda ) ||
+      line_current.match(patterns.exit_function )  ){ 
         func.encapsulated++;
-        if(func.encapsulated == 0 ){
-          func.inside_code = false;
-          log("left function")
-        } else {
-          log("left lambda/condition")
-          
-        }
-      }
+        log("left lambda/condition")
+      }  
       
-      if(func.inside_code == false){
+      
+      if(func.encapsulated == 0 ){
+        func.inside_code = false;
+        file.next_word();
+        log("left function")
+      } 
+      else if(func.inside_code == true){
         Skip_Function_Code();
       }
-        
+      
     }
       
 }
 
 const optimalRead =  (): string => {
-  let  result =  coreParser.file?.current_word()!;
+  let  result =  coreParser.file?.next_word()!;
   let namespace  = coreParser.namespace!;
   
-  if(lineIsNamespace(result)){
-    namespace.Names = result.split(' ')[1] + '::';
+  if(result.match(/namespace/)){
+    result =  result.replace(/^\s*namespace/, 'namespace'); 
+    
+    let keyname : string ="";
+   
+    keyname += result.split(' ')[1] + '::';
+      
+    namespace.Names.push(keyname); 
+    
+    
     namespace.encapsulated++;
-  
+    namespace.is_Nested = true;
   } 
   else if(result.match(patterns.enter_Function_Allman) || result?.match(patterns.enter_Function_KnR)){
+    coreParser.function?.ignore_implements += result.replace(/{/, " ").replace(/\s^/, "");
+    coreParser.function?.encapsulated = -1;
+    coreParser.function?.inside_code=true;
     Skip_Function_Code();
-      
+    result = coreParser.file?.current_word()!;  
   } 
   else if( namespace.encapsulated > 0 && result.includes('}')){// disable namespace as an addition to function snippets
-    namespace.encapsulated++;
+    namespace.encapsulated--;
+    if(namespace.encapsulated != 1) namespace.Names.pop();
     // ... 
-  }
+  } else {
+  
+       
+  } 
+      
+  
     
     
   
@@ -155,12 +174,15 @@ export function parse(fileContent: string): header {
   coreParser.namespace = new Namespace;
   coreParser.function = new objFunction;
   coreParser.file = new objFileTracker;
-  
+  coreParser.file.array = arrayFileContent;
   let namespace  = coreParser.namespace;
-  
+  namespace.is_Nested = false;
   
   while(!coreParser.file.reached_limit()){
     
+    if(coreParser.file.index == 15){
+      log("wtf")
+    }
         temp = optimalRead();
         if(lineIsComment(temp)){
             commentBlock = temp.startsWith('/*') ? true : commentBlock;
@@ -206,6 +228,15 @@ export function parse(fileContent: string): header {
         }
     }
 
+  for(let methods in h.methods )
+  {
+      if(coreParser.function.ignore_implements.includes(h.methods[methods])){
+                log("wtf")
+                let num :number =  +methods!;
+                h.methods.splice(num, 1);
+      }
+  
+  }  
     return h;
 }
 
@@ -280,9 +311,12 @@ function lineIsMethodSignature(line: string, insideBracket:number): boolean {
   function addNamespace(line: string, namespace : Namespace): string {
     let result : string = '';
     
-    if(namespace.is_Nested){
+    if(coreParser.namespace.is_Nested){
+  
+      line = line.replace(/^\s*/,"")
       let format = line.split(' '); 
-      result += format[0], result +=  ` ${namespace.Names}`;
+      let name = coreParser.namespace.Names.toString().replace(/,/, "")
+      result += format[0], result +=  ` ${name}`;
       let  seperate = format.slice(1).join(' ');
       result += seperate;
     } else {
