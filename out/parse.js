@@ -114,7 +114,7 @@ const Skip_Function_Code = () => {
     }
 };
 const optimalRead = () => {
-    var _a, _b, _c;
+    var _a, _b, _c, _d;
     let result = (_a = coreParser.file) === null || _a === void 0 ? void 0 : _a.next_word();
     let namespace = coreParser.namespace;
     if (result.match(/namespace/)) {
@@ -124,18 +124,18 @@ const optimalRead = () => {
         namespace.Names.push(keyname);
         namespace.encapsulated++;
         namespace.is_Nested = true;
+        (_b = coreParser.file) === null || _b === void 0 ? void 0 : _b.next_word();
     }
     else if (result.match(patterns.enter_Function_Allman) || (result === null || result === void 0 ? void 0 : result.match(patterns.enter_Function_KnR))) {
         coreParser.function.ignore_implements += result.replace(/{/, " ").replace(/\s^/, "");
-        (_b = coreParser.function) === null || _b === void 0 ? void 0 : _b.encapsulated = -1;
+        (_c = coreParser.function) === null || _c === void 0 ? void 0 : _c.encapsulated = -1;
         coreParser.function.inside_code = true;
         Skip_Function_Code();
-        result = (_c = coreParser.file) === null || _c === void 0 ? void 0 : _c.current_word();
+        result = (_d = coreParser.file) === null || _d === void 0 ? void 0 : _d.current_word();
     }
-    else if (namespace.encapsulated > 0 && result.includes('}')) { // disable namespace as an addition to function snippets
+    else if (namespace.encapsulated > 0 && result.match(/}/)) { // disable namespace as an addition to function snippets
+        namespace.Names.pop();
         namespace.encapsulated--;
-        if (namespace.encapsulated != 1)
-            namespace.Names.pop();
         // ... 
     }
     else {

@@ -132,6 +132,7 @@ const optimalRead =  (): string => {
     
     namespace.encapsulated++;
     namespace.is_Nested = true;
+    coreParser.file?.next_word();
   } 
   else if(result.match(patterns.enter_Function_Allman) || result?.match(patterns.enter_Function_KnR)){
     coreParser.function.ignore_implements += result.replace(/{/, " ").replace(/\s^/, "");
@@ -140,9 +141,9 @@ const optimalRead =  (): string => {
     Skip_Function_Code();
     result = coreParser.file?.current_word()!;  
   } 
-  else if( namespace.encapsulated > 0 && result.includes('}')){// disable namespace as an addition to function snippets
+  else if( namespace.encapsulated > 0 && result.match(/}/)){// disable namespace as an addition to function snippets
+     namespace.Names.pop();
     namespace.encapsulated--;
-    if(namespace.encapsulated != 1) namespace.Names.pop();
     // ... 
   } else {
   
