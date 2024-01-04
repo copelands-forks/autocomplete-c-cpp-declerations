@@ -6,10 +6,10 @@
 	"engines": {
 		"vscode": "^1.43.0"
 	},
-	"publisher": "SteveSevetS",
+	"publisher": "Copelands",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/SteveSevetS/autocomplete-c-cpp-files.git"
+		"url": "https://github.com/copelands-forks/autocomplete-c-cpp-declerations/.git"
 	},
 	"categories": [
 		"Programming Languages",
@@ -104,7 +104,7 @@
 	"__metadata": {
 		"id": "72a8cca5-32e6-469d-a1b0-43b61d0e8863",
 		"publisherId": "b3c80a9b-0db9-4af1-bfa3-9de5a5def821",
-		"publisherDisplayName": "SteveSevetS",
+		"publisherDisplayName": "Copelands",
 		"targetPlatform": "undefined",
 		"updated": false,
 		"isPreReleaseVersion": false,
