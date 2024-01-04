@@ -28,7 +28,7 @@ function isTriggerCharValid(document, position) {
     const lineText = document.lineAt(position.line).text;
     const prefix = lineText.substring(0, position.character);
     //const isValidContext = !prb|\.\w*$/); actually stupid
-    return (lineText.startsWith('.')) ? true : false;
+    return /\.\s*/.test(lineText);
 }
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed

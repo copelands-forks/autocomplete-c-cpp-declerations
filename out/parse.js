@@ -16,13 +16,114 @@ class header {
 }
 exports.header = header;
 class Namespace {
+    constructor() {
+        this.Names = '';
+        this.encapsulated = 0;
+        this.is_Nested = false;
+    }
 }
 ;
+class objFunction {
+    constructor() {
+        this.Name = '';
+        this.encapsulated = 0;
+        this.inside_code = false;
+    }
+}
+;
+class objFileTracker {
+    constructor() {
+        this.index = 0;
+        this.array = [];
+    }
+    reached_limit() {
+        if (this.index > this.array.length)
+            return false;
+        return true;
+    }
+    next_word() {
+        this.index++;
+        return this.array[this.index];
+    }
+    previous_word() {
+        this.index--;
+        return this.array[this.index];
+    }
+    current_word() {
+        return this.array[this.index];
+    }
+}
+class ObjCoreParser {
+}
+var coreParser;
+const debug_log = true;
+const log = (Message) => {
+    if (debug_log)
+        console.log(Message);
+};
+const Codepat = {
+    enter_conditions_KnR: /)\s*{/,
+    enter_conditions_Allman: /\s*{/,
+    enter_lambdaFunction_Allman: /\s*{/,
+    enter_lambdaFunction_KnR: /)\s*{/,
+    exit_condition_lambda: /(\s}\s)|(\s};)/,
+};
+const patterns = {
+    enter_Function_KnR: /)\s*/,
+    enter_Function_Allman: /\s*{/,
+    exit_function: /\s*}\s*/,
+    code: Codepat
+};
+const Skip_Function_Code = () => {
+    let func = coreParser.function;
+    var file = coreParser.file;
+    if ((file === null || file === void 0 ? void 0 : file.reached_limit()) && func.encapsulated < 0) { // i kinda forgot how to use javascript lol a while loop will do
+        let line_current = file === null || file === void 0 ? void 0 : file.current_word();
+        let line_next = file === null || file === void 0 ? void 0 : file.next_word();
+        //  inside conditions and lambda ignore them 
+        if (line_current.match(patterns.code.enter_conditions_KnR) || line_current.match(patterns.code.enter_conditions_Allman)) {
+            log("entered lambda/condition");
+            func.encapsulated--;
+            func.inside_code = true;
+        }
+        // exiting conditions and lambda functions
+        else if (func.inside_code && line_current.match(patterns.code.exit_condition_lambda)) {
+            func.encapsulated++;
+            if (func.encapsulated == 0) {
+                func.inside_code = false;
+                log("left function");
+            }
+            else {
+                log("left lambda/condition");
+            }
+        }
+        if (func.inside_code == false) {
+            Skip_Function_Code();
+        }
+    }
+};
+const optimalRead = () => {
+    var _a;
+    let result = (_a = coreParser.file) === null || _a === void 0 ? void 0 : _a.current_word();
+    let namespace = coreParser.namespace;
+    if (lineIsNamespace(result)) {
+        namespace.Names = result.split(' ')[1] + '::';
+        namespace.encapsulated++;
+    }
+    else if (result.match(patterns.enter_Function_Allman) || (result === null || result === void 0 ? void 0 : result.match(patterns.enter_Function_KnR))) {
+        Skip_Function_Code();
+    }
+    else if (namespace.encapsulated > 0 && result.includes('}')) { // disable namespace as an addition to function snippets
+        namespace.encapsulated++;
+        // ... 
+    }
+    return result;
+};
 /**
  * parses the C/C++ header file
  * @param fileContent string that contains the file content divided by \n
- * @returns return a header instance that contanis the file parsed file
- */
+ *
+*/
 function parse(fileContent) {
     let h = new header();
     let commentBlock = false;
@@ -31,46 +132,13 @@ function parse(fileContent) {
     let temp;
     // copleands -- implementation to avoid reading inside of functions
     let result;
-    let i;
-    let namespace = new Namespace;
-    let optimal_lineReads = (arrayFile) => {
-        result = arrayFile[i].trimLeft();
-        if (lineIsNamespace(result)) {
-            namespace.name = result.split(' ')[1] + '::';
-            namespace.inside = 1;
-        }
-        // check if we are a inside function
-        if (result.match(/\)\{\s*$/)) {
-            let outside_function = 0;
-            while (i < arrayFile.length && !outside_function) { // i kinda forgot how to use javascript lol a while loop will do
-                i++;
-                let leavefunction = arrayFile[i].trimLeft();
-                if (leavefunction.includes('){') || leavefunction.includes(')') && arrayFile[2 + i + leavefunction.length] == '{') {
-                    //  inside conditions and lambda ignore them 
-                    outside_function = -1;
-                }
-                else if (outside_function == -1) {
-                    // conditions and lambda  exits
-                    outside_function = (leavefunction.includes('}')) ? 0 : -1;
-                }
-                else {
-                    if (!leavefunction.includes('};') && leavefunction.includes("}")) {
-                        result = arrayFile[i].trimLeft();
-                        outside_function = 1;
-                    }
-                }
-            }
-        }
-        else if (namespace.inside == 1) { // disable namespace as an addition to function snippets
-            if (result.includes('}')) {
-                namespace.inside = 0;
-            }
-            // ... 
-        }
-        return result;
-    };
-    for (i = 0; i < arrayFileContent.length; i++) {
-        temp = optimal_lineReads(arrayFileContent);
+    let index;
+    coreParser.namespace = new Namespace;
+    coreParser.function = new objFunction;
+    coreParser.file = new objFileTracker;
+    let namespace = coreParser.namespace;
+    while (!coreParser.file.reached_limit()) {
+        temp = optimalRead();
         if (lineIsComment(temp)) {
             commentBlock = temp.startsWith('/*') ? true : commentBlock;
         }
@@ -184,9 +252,9 @@ function lineIsMethodSignature(line, insideBracket) {
 }
 function addNamespace(line, namespace) {
     let result = '';
-    if (namespace.inside) {
+    if (namespace.is_Nested) {
         let format = line.split(' ');
-        result += format[0], result += ` ${namespace.name}`;
+        result += format[0], result += ` ${namespace.Names}`;
         let seperate = format.slice(1).join(' ');
         result += seperate;
     }
@@ -206,8 +274,6 @@ function lineIsComment(line) {
 }
 function lineIsMain(line) {
     var res = line.includes('main');
-    if (res)
-        console.log(res);
     return res;
 }
 function lineHasOpenBracket(line) {
