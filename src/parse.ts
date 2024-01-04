@@ -55,7 +55,7 @@ class ObjCoreParser {
     
 var coreParser: ObjCoreParser = new ObjCoreParser();
 
-const debug_log = true;
+const debug_log = false ; // enable debug logs
 
 const log = (Message : string)=>{
     if ( debug_log )  console.log(Message);
@@ -180,9 +180,7 @@ export function parse(fileContent: string): header {
   
   while(!coreParser.file.reached_limit()){
     
-    if(coreParser.file.index == 15){
-      log("wtf")
-    }
+   
         temp = optimalRead();
         if(lineIsComment(temp)){
             commentBlock = temp.startsWith('/*') ? true : commentBlock;
@@ -231,7 +229,7 @@ export function parse(fileContent: string): header {
   for(let methods in h.methods )
   {
       if(coreParser.function.ignore_implements.includes(h.methods[methods])){
-                log("wtf")
+              
                 let num :number =  +methods!;
                 h.methods.splice(num, 1);
       }

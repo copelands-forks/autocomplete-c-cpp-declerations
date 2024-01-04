@@ -164,14 +164,7 @@ async function createCompletitions(editor: TextEditor | undefined, deleteRange: 
 			}
 		}
 	}
-	if(completitions.length) {
-	  console.log(completitions.toString() + "\n completions");
-	  completitions.forEach((Completion: string ,a, self )=>{
-      console.log(Completion.label);
-    });
-    
-    console.log(" end: ..... completions");
-	}
+	 
 	return completitions;
 }
 
