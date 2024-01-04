@@ -2,8 +2,8 @@
   
   a fork of SteveveSevetS's project:
   
-    - the purpose of the fork was to expand the extension so that it is useful in large scale C++/C  projects as well as add my own things to it.
-    - a lot of source changes has been made and new features are present.
+     the purpose of the fork was to expand the extension so that it is useful in large scale C++/C  projects as well as add my own things to it.
+     a lot of source changes has been made and new features are present.
   
   New Features : 
   
