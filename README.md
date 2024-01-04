@@ -33,3 +33,4 @@
 
 contribute to this repo through pull requests or report issues  over [here](https://github.com/copelands-forks/autocomplete-c-cpp-declerations/)
 
+[VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=jordanpetak.autocomplete-c-cpp-declerations)
