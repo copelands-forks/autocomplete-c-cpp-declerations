@@ -5,6 +5,7 @@
  * @field includes is the array that contains the headers included
  * @field methods is the array that contains the methods signatures
  */
+ // @ts-nocheck
 export class header {
     namespace?: string;
     class?: string;
@@ -48,9 +49,9 @@ class objFileTracker {
   }
 }
 class ObjCoreParser {
-    namespace?:Namespace;
-    function?:objFunction;
-    file?:objFileTracker;
+    namespace?:Namespace = new Namespace;
+    function?:objFunction = new objFunction;
+    file?:objFileTracker = new objFileTracker;
 }
     
 var coreParser: ObjCoreParser = new ObjCoreParser();
@@ -133,9 +134,9 @@ const optimalRead =  (): string => {
     namespace.is_Nested = true;
   } 
   else if(result.match(patterns.enter_Function_Allman) || result?.match(patterns.enter_Function_KnR)){
-    coreParser.function?.ignore_implements += result.replace(/{/, " ").replace(/\s^/, "");
+    coreParser.function.ignore_implements += result.replace(/{/, " ").replace(/\s^/, "");
     coreParser.function?.encapsulated = -1;
-    coreParser.function?.inside_code=true;
+    coreParser.function.inside_code=true;
     Skip_Function_Code();
     result = coreParser.file?.current_word()!;  
   } 

@@ -8,6 +8,7 @@ exports.fileIsMain = exports.indent = exports.parse = exports.header = void 0;
  * @field includes is the array that contains the headers included
  * @field methods is the array that contains the methods signatures
  */
+// @ts-nocheck
 class header {
     constructor() {
         this.includes = new Array();
@@ -59,9 +60,14 @@ class objFileTracker {
     }
 }
 class ObjCoreParser {
+    constructor() {
+        this.namespace = new Namespace;
+        this.function = new objFunction;
+        this.file = new objFileTracker;
+    }
 }
 var coreParser = new ObjCoreParser();
-const debug_log = true;
+const debug_log = false; // enable debug logs
 const log = (Message) => {
     if (debug_log)
         console.log(Message);
@@ -108,7 +114,7 @@ const Skip_Function_Code = () => {
     }
 };
 const optimalRead = () => {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c;
     let result = (_a = coreParser.file) === null || _a === void 0 ? void 0 : _a.next_word();
     let namespace = coreParser.namespace;
     if (result.match(/namespace/)) {
@@ -120,11 +126,11 @@ const optimalRead = () => {
         namespace.is_Nested = true;
     }
     else if (result.match(patterns.enter_Function_Allman) || (result === null || result === void 0 ? void 0 : result.match(patterns.enter_Function_KnR))) {
-        (_b = coreParser.function) === null || _b === void 0 ? void 0 : _b.ignore_implements += result.replace(/{/, " ").replace(/\s^/, "");
-        (_c = coreParser.function) === null || _c === void 0 ? void 0 : _c.encapsulated = -1;
-        (_d = coreParser.function) === null || _d === void 0 ? void 0 : _d.inside_code = true;
+        coreParser.function.ignore_implements += result.replace(/{/, " ").replace(/\s^/, "");
+        (_b = coreParser.function) === null || _b === void 0 ? void 0 : _b.encapsulated = -1;
+        coreParser.function.inside_code = true;
         Skip_Function_Code();
-        result = (_e = coreParser.file) === null || _e === void 0 ? void 0 : _e.current_word();
+        result = (_c = coreParser.file) === null || _c === void 0 ? void 0 : _c.current_word();
     }
     else if (namespace.encapsulated > 0 && result.includes('}')) { // disable namespace as an addition to function snippets
         namespace.encapsulated--;
@@ -157,9 +163,6 @@ function parse(fileContent) {
     let namespace = coreParser.namespace;
     namespace.is_Nested = false;
     while (!coreParser.file.reached_limit()) {
-        if (coreParser.file.index == 15) {
-            log("wtf");
-        }
         temp = optimalRead();
         if (lineIsComment(temp)) {
             commentBlock = temp.startsWith('/*') ? true : commentBlock;
@@ -208,7 +211,6 @@ function parse(fileContent) {
     }
     for (let methods in h.methods) {
         if (coreParser.function.ignore_implements.includes(h.methods[methods])) {
-            log("wtf");
             let num = +methods;
             h.methods.splice(num, 1);
         }

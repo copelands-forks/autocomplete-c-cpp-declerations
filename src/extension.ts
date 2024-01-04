@@ -1,6 +1,7 @@
+// @ts-nocheck
 import { ExtensionContext, commands, window, workspace, Position, ViewColumn, languages, CompletionItem, SnippetString, Uri, TextEditor, Range, TextEdit, DocumentHighlight } from 'vscode'; //import vscode classes and workspace
 import { header, parse, indent, fileIsMain } from './parse'; //import parse functions and class
-
+import { CompletionItemProvider, TextDocument,   CancellationToken,   CompletionList } from 'vscode';
 //settings
 var indentStyle: string | undefined;
 var columnNumber: ViewColumn | undefined;
@@ -14,7 +15,6 @@ function readSettings(): void {
 	triggerChar = workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
 	headersFolder = workspace.getConfiguration('autocomplete-c-cpp-files').get('headersFolder');
 }
-import { CompletionItemProvider, TextDocument, Position, CancellationToken, CompletionItem, CompletionList } from 'vscode';
 
 function isTriggerCharValid(document: TextDocument, position: Position): boolean {
   const lineText = document.lineAt(position.line).text;

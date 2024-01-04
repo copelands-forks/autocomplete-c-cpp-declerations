@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
+// @ts-nocheck
 const vscode_1 = require("vscode"); //import vscode classes and workspace
 const parse_1 = require("./parse"); //import parse functions and class
 //settings
@@ -165,13 +166,6 @@ function createCompletitions(editor, deleteRange) {
                     }
                 }
             }
-        }
-        if (completitions.length) {
-            console.log(completitions.toString() + "\n completions");
-            completitions.forEach((Completion, a, self) => {
-                console.log(Completion.label);
-            });
-            console.log(" end: ..... completions");
         }
         return completitions;
     });
