@@ -1,12 +1,12 @@
 {
-	"name": "autocomplete-c-cpp-files",
-	"displayName": "Autocomplete C/C++ files",
-	"description": "This extension will write the implementation of your C/C++ code without make you copy and paste like an idiot",
+	"name": "autocomplete-c-cpp-declerations",
+	"displayName": "Autocomplete C/C++ declerations",
+	"description": "autocomplete-c-cpp-declerations use . to see the magic, visit github repo for more information!",
 	"version": "1.0.3",
 	"engines": {
 		"vscode": "^1.43.0"
 	},
-	"publisher": "Copelands",
+	"publisher": "jordanpetak",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/copelands-forks/autocomplete-c-cpp-declerations/.git"
