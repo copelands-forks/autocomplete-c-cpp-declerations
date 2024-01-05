@@ -1,4 +1,4 @@
-***Auto Complete Declerations! C/C++***
+ ***Auto Complete Declerations! C/C++***
   
   a fork of SteveveSevetS's project:
   

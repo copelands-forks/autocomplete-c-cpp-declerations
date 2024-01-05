@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 	<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
 		<Metadata>
-			<Identity Language="en-US" Id="autocomplete-c-cpp-declerations" Version="1.0" Publisher="Copelands" />
-			<DisplayName>Autocomplete C/C++ files</DisplayName>
-			<Description xml:space="preserve">Press . and see the magic, visit github for more details!</Description>
-			<Tags>keybindings,c,cpp,c++</Tags>
+			<Identity Language="en-US" Id="autocomplete-c-cpp-declerations" Version="2.0.1" Publisher="jordanpetak" />
+			<DisplayName>Autocomplete C/C++ declerations</DisplayName>
+			<Description xml:space="preserve">autocomplete-c-cpp-declerations use . to see the magic, visit github repo for more information!</Description>
+			<Tags>keybindings,c,cpp</Tags>
 			<Categories>Programming Languages,Snippets</Categories>
 			<GalleryFlags>Public</GalleryFlags>
 			
@@ -16,11 +16,11 @@
 				<Property Id="Microsoft.VisualStudio.Code.LocalizedLanguages" Value="" />
 				
 				
-				<Property Id="Microsoft.VisualStudio.Services.Links.Source" Value="https://github.com/copelands-forks/autocomplete-c-cpp-declerations.git" />
-				<Property Id="Microsoft.VisualStudio.Services.Links.Getstarted" Value="https://github.com/copelands-forks/autocomplete-c-cpp-declerations.git" />
-				<Property Id="Microsoft.VisualStudio.Services.Links.GitHub" Value="https://github.com/copelands-forks/autocomplete-c-cpp-declerations.git" />
-				<Property Id="Microsoft.VisualStudio.Services.Links.Support" Value="https://github.com/copelands-forks/autocomplete-c-cpp-declerations/issues" />
-				<Property Id="Microsoft.VisualStudio.Services.Links.Learn" Value="https://github.com/copelands-forks/autocomplete-c-cpp-declerations#readme" />
+				<Property Id="Microsoft.VisualStudio.Services.Links.Source" Value="https://github.com/copelands-forks/autocomplete-c-cpp-declerations/.git" />
+				<Property Id="Microsoft.VisualStudio.Services.Links.Getstarted" Value="https://github.com/copelands-forks/autocomplete-c-cpp-declerations/.git" />
+				<Property Id="Microsoft.VisualStudio.Services.Links.GitHub" Value="https://github.com/copelands-forks/autocomplete-c-cpp-declerations/.git" />
+				
+				
 				
 				
 				<Property Id="Microsoft.VisualStudio.Services.GitHubFlavoredMarkdown" Value="true" />
@@ -39,7 +39,6 @@
 		<Assets>
 			<Asset Type="Microsoft.VisualStudio.Code.Manifest" Path="extension/package.json" Addressable="true" />
 			<Asset Type="Microsoft.VisualStudio.Services.Content.Details" Path="extension/README.md" Addressable="true" />
-<Asset Type="Microsoft.VisualStudio.Services.Content.Changelog" Path="extension/CHANGELOG.md" Addressable="true" />
 <Asset Type="Microsoft.VisualStudio.Services.Content.License" Path="extension/LICENSE.txt" Addressable="true" />
 		</Assets>
 	</PackageManifest>

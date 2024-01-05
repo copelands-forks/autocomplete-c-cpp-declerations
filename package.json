@@ -2,7 +2,7 @@
 	"name": "autocomplete-c-cpp-declerations",
 	"displayName": "Autocomplete C/C++ declerations",
 	"description": "autocomplete-c-cpp-declerations use . to see the magic, visit github repo for more information!",
-	"version": "1.0.9",
+	"version": "2.0.1",
 	"engines": {
 		"vscode": "^1.43.0"
 	},
@@ -102,14 +102,15 @@
 		"vscode-test": "^1.0.2"
 	},
 	"__metadata": {
-		"id": "72a8cca5-32e6-469d-a1b0-43b61d0e8863",
-		"publisherId": "b3c80a9b-0db9-4af1-bfa3-9de5a5def821",
-		"publisherDisplayName": "Copelands",
+		"id": "7b65cb91-bbba-487a-8096-7b954acdd4da",
+		"publisherId": "2656b791-c5ca-440a-ae7d-174eff1b6cb1",
+		"publisherDisplayName": "jordan petak",
 		"targetPlatform": "undefined",
-		"updated": false,
+		"updated": true,
 		"isPreReleaseVersion": false,
-		"installedTimestamp": 1704254277663,
+		"installedTimestamp": 1704470983248,
 		"pinned": false,
-		"preRelease": false
+		"preRelease": false,
+		"isApplicationScoped": false
 	}
 }

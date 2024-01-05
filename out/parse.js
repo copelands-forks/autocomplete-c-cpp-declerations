@@ -1,14 +1,21 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.fileIsMain = exports.indent = exports.parse = exports.header = void 0;
 /**
  * defines a .c or .cpp header that defines
  * @field namespace is the namespace name
  * @field class is the name of the class
  * @field includes is the array that contains the headers included
  * @field methods is the array that contains the methods signatures
- */
+*/
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.fileIsMain = exports.indent = exports.parse = exports.header = void 0;
 // @ts-nocheck
+/**
+  
+  * @field copelands -- fork implementations, aside from minor impls and changes i introduced the CoreParser
+    * I have never worked with anyone ever when coding so i might not know how to comment shit please be kind.
+    * I dont like javascript and this is my first time ever working with typescript and it makes me rage.
+            
+*/
 class header {
     constructor() {
         this.includes = new Array();
@@ -16,7 +23,7 @@ class header {
     }
 }
 exports.header = header;
-class Namespace {
+class OSDN {
     constructor() {
         this.Names = [];
         this.encapsulated = 0;
@@ -25,7 +32,7 @@ class Namespace {
 ;
 class objFunction {
     constructor() {
-        this.ignore_implements = "$";
+        this.ignore_implements = "";
         this.encapsulated = 0;
     }
 }
@@ -35,6 +42,9 @@ class objFileTracker {
         this.index = 0;
         this.array = [];
     }
+    traverse(value) {
+        this.index += value;
+    }
     reached_limit() {
         if (this.index + 1 >= this.array.length) {
             return true;
@@ -42,32 +52,39 @@ class objFileTracker {
         else
             return false;
     }
-    next_word() {
+    next_line() {
         if (!this.reached_limit()) {
-            this.index++;
+            this.traverse(1);
             return this.array[this.index];
         }
         else {
             return this.array[this.index];
         }
     }
-    previous_word() {
-        this.index--;
+    relative_line(value) {
+        if (value) {
+            let rel = value + this.index;
+            return (rel < this.array.length) ? this.array[rel] : this.current_line();
+        }
+        return this.array[value];
+    }
+    previous_line() {
+        this.traverse(-1);
         return this.array[this.index];
     }
-    current_word() {
+    current_line() {
         return this.array[this.index];
     }
 }
 class ObjCoreParser {
     constructor() {
-        this.namespace = new Namespace;
+        this.namespace = new OSDN;
         this.function = new objFunction;
         this.file = new objFileTracker;
     }
 }
 var coreParser = new ObjCoreParser();
-const debug_log = false; // enable debug logs
+const debug_log = true; // enable debug logs
 const log = (Message) => {
     if (debug_log)
         console.log(Message);
@@ -88,8 +105,8 @@ const patterns = {
 const Skip_Function_Code = () => {
     let func = coreParser.function;
     var file = coreParser.file;
-    if (!(file === null || file === void 0 ? void 0 : file.reached_limit()) && func.encapsulated < 0) { // skip function code 
-        let line_next = file === null || file === void 0 ? void 0 : file.next_word();
+    if (!(file === null || file === void 0 ? void 0 : file.reached_limit()) && func.encapsulated < 0) {
+        let line_next = file === null || file === void 0 ? void 0 : file.next_line();
         let line_current = line_next;
         //  inside conditions and lambda ignore them 
         if (line_current.match(patterns.code.enter_conditions_KnR) || line_next.match(patterns.code.enter_conditions_Allman)) {
@@ -105,7 +122,7 @@ const Skip_Function_Code = () => {
         }
         if (func.encapsulated == 0) {
             func.inside_code = false;
-            file.next_word();
+            file.next_line();
             log("left function");
         }
         else if (func.inside_code == true) {
@@ -113,34 +130,54 @@ const Skip_Function_Code = () => {
         }
     }
 };
-const optimalRead = () => {
-    var _a, _b, _c, _d;
-    let result = (_a = coreParser.file) === null || _a === void 0 ? void 0 : _a.next_word();
-    let namespace = coreParser.namespace;
-    if (result.match(/namespace/)) {
-        result = result.replace(/^\s*namespace/, 'namespace');
-        let keyname = "";
-        keyname += result.split(' ')[1] + '::';
-        namespace.Names.push(keyname);
-        namespace.encapsulated++;
-        namespace.is_Nested = true;
-        (_b = coreParser.file) === null || _b === void 0 ? void 0 : _b.next_word();
+const handle_OSDN = (current_line, osdn) => {
+    let file = coreParser.file;
+    // keep forgetting its a fucking array of lines, oh steve be more inclusive to autists working on your projects
+    //let pattern = // /namespace {|namespace\s*{/ garbage...
+    let pattern = /namespace|class|struct|\benum class\b|enum/; //  btw im so acoustic i learned regex in a day
+    let name = "";
+    if (current_line.match(pattern)) {
+        name = current_line;
+        let underline = file.relative_line(1);
+        if (!current_line.match(/{/) && underline.match(/^\s*{/))
+            coreParser.file.traverse(2);
     }
-    else if (result.match(patterns.enter_Function_Allman) || (result === null || result === void 0 ? void 0 : result.match(patterns.enter_Function_KnR))) {
-        coreParser.function.ignore_implements += result.replace(/{/, " ").replace(/\s^/, "");
-        (_c = coreParser.function) === null || _c === void 0 ? void 0 : _c.encapsulated = -1;
+    else
+        return;
+    let combine = new RegExp(`/^\s*\b${pattern}\b/`); // getting quite good yea
+    name = name.replace(pattern, "");
+    name = name.replace(/{/, '');
+    // let keyname  = name.split(' ')[1] + '::'; // really good baby
+    let keyname = name.replace(/^\s*|\s*$/g, "") + '::';
+    osdn.Names.push(keyname);
+    osdn.encapsulated++;
+    osdn.is_Nested = true;
+    return true;
+};
+// @ts-ignore
+const optimalRead = () => {
+    var _a, _b;
+    let current_line = (_a = coreParser.file) === null || _a === void 0 ? void 0 : _a.next_line();
+    let namespace = coreParser.namespace;
+    if (handle_OSDN(current_line, namespace)) {
+        return current_line;
+    }
+    else if (current_line.match(patterns.enter_Function_Allman) || (current_line === null || current_line === void 0 ? void 0 : current_line.match(patterns.enter_Function_KnR))) {
+        coreParser.function.ignore_implements += current_line.replace(/{/, " ").replace(/\s^/, "");
+        coreParser.function.encapsulated = -1;
         coreParser.function.inside_code = true;
         Skip_Function_Code();
-        result = (_d = coreParser.file) === null || _d === void 0 ? void 0 : _d.current_word();
+        current_line = (_b = coreParser.file) === null || _b === void 0 ? void 0 : _b.current_line();
     }
-    else if (namespace.encapsulated > 0 && result.match(/}/)) { // disable namespace as an addition to function snippets
+    else if (namespace.encapsulated > 0 && current_line.match(/}/)) {
+        // disable namespace as an addition to function snippets
         namespace.Names.pop();
         namespace.encapsulated--;
         // ... 
     }
     else {
     }
-    return result;
+    return current_line;
 };
 /**
  * parses the C/C++ header file
@@ -150,20 +187,20 @@ const optimalRead = () => {
 function parse(fileContent) {
     let h = new header();
     let commentBlock = false;
-    let bracketsCount = 0; //cout the number of { } to dertermine if a class ends
+    let bracketsCount = 0; // cout the number of { } to dertermine if a class ends
     let arrayFileContent = fileContent.split('\n');
     let temp;
-    // copleands -- implementation to avoid reading inside of functions
     let result;
     let index;
-    coreParser.namespace = new Namespace;
+    coreParser.namespace = new OSDN;
     coreParser.function = new objFunction;
     coreParser.file = new objFileTracker;
     coreParser.file.array = arrayFileContent;
     let namespace = coreParser.namespace;
     namespace.is_Nested = false;
     while (!coreParser.file.reached_limit()) {
-        temp = optimalRead();
+        temp = optimalRead(); // Serve Steve's magic tomato soup algorithm with my own algo built ontop of it.
+        bracketsCount = coreParser.namespace.encapsulated; // magic soup please do your shit
         if (lineIsComment(temp)) {
             commentBlock = temp.startsWith('/*') ? true : commentBlock;
         }
@@ -171,33 +208,26 @@ function parse(fileContent) {
             commentBlock = temp.includes('*/') ? false : commentBlock;
         }
         else {
-            if (bracketsCount < 1 || (bracketsCount < 2 && h.namespace)) {
-                if (lineHasOpenBracket(temp)) {
-                    bracketsCount++;
-                }
-                if (lineHasCloseBracket(temp)) {
-                    bracketsCount--;
-                }
-                if (lineIsInclude(temp)) {
-                    h.includes.push(temp);
-                }
-                if (lineIsMethodSignature(temp, bracketsCount)) {
-                    if (bracketsCount == 0 || (bracketsCount == 1 && h.namespace)) {
-                        temp = addNamespace(temp, namespace);
-                        h.methods.push(formatMethodsignature(temp.split(';')[0], undefined));
-                    }
-                    else {
-                        temp = addNamespace(temp, namespace);
-                        h.methods.push(formatMethodsignature(temp.split(';')[0], h.class));
-                    }
-                }
-                if (lineIsClass(temp)) {
-                    h.class = temp.split(' ')[1].trim();
-                }
-                if (lineIsNamespace(temp)) {
-                    temp += temp.includes('{') ? '' : '{';
-                    h.namespace = temp;
-                }
+            // how do you tame this thing // if(bracketsCount < 1 || (bracketsCount < 2 && h.namespace)){ 
+            if (lineHasOpenBracket(temp)) {
+                bracketsCount++;
+            }
+            if (lineHasCloseBracket(temp)) {
+                bracketsCount--;
+            }
+            if (lineIsInclude(temp)) {
+                h.includes.push(temp);
+            }
+            if (lineIsMethodSignature(temp, bracketsCount)) {
+                temp = addNamespace(temp, namespace);
+                h.methods.push(formatMethodsignature(temp.split(';')[0], h.class));
+            }
+            if (lineIsClass(temp)) {
+                h.class = temp.split(' ')[1].trim();
+            }
+            if (lineIsNamespace(temp)) {
+                temp += temp.includes('{') ? '' : '{';
+                h.namespace = temp;
             }
             else {
                 if (lineHasOpenBracket(temp)) {
@@ -208,11 +238,16 @@ function parse(fileContent) {
                 }
             }
         }
-    }
-    for (let methods in h.methods) {
-        if (coreParser.function.ignore_implements.includes(h.methods[methods])) {
-            let num = +methods;
-            h.methods.splice(num, 1);
+        let ignore = coreParser.function.ignore_implements.replace(/\s*([a-z]*::)*/g, "");
+        for (let i = 0; i < h.methods.length; i++) {
+            h.methods[i] = h.methods[i].replace(/,/g, "");
+            let method_string = h.methods[i];
+            method_string = method_string.replace(/\s*([a-z]*::)*/g, "");
+            if (ignore.match(method_string)) {
+                // @ts-ignore
+                h.methods.splice(i, 1);
+                i--;
+            }
         }
     }
     return h;
@@ -224,7 +259,7 @@ exports.parse = parse;
  * @param className optional parameter that contains the class name to be added before the function name
  *
  * @returns return a string that contains the formatted method signature
- */
+*/
 function formatMethodsignature(methodSignature, className) {
     let arrayMethodSignature = methodSignature.split('(');
     let arrayMethodSignature2 = arrayMethodSignature[0].split(' ');
