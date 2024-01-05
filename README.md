@@ -6,14 +6,17 @@
      a lot of source changes has been made and new features are present.
   
   New Features : 
-  
-    - Trigger key AutoCompletion Rework
     
-          Auto Completion no longer restricted to single .cpp files where int main is present
+    - Trigger key Auto Completion Rework
+      - namespaces, structs, classes, enum classes and enums have been added!
+      
+          -Auto Completion no longer restricted to single .cpp files where int main is present
           it works across all files now.
   
-          Auto Completion now works in headers so that it is ussful in header implementation and
+          -Auto Completion now works in headers so that it is ussful in header implementation and
           header only code.
+
+          -Auto Completion removes suggestions from already defined functions and methods.
           
     
     - Auto Completion suggestion Rework
