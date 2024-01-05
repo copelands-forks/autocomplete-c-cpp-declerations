@@ -145,8 +145,10 @@ const handle_OSDN = (current_line : string, osdn : OSDN) =>
   let file = coreParser.file ;
   // keep forgetting its a fucking array of lines, oh steve be more inclusive to autists working on your projects
   //let pattern = // /namespace {|namespace\s*{/ garbage...
-  let pattern = /namespace|class|struct|\benum class\b|enum/; //  btw im so acoustic i learned regex in a day
+  let pattern = /namespace|\bclass\b|\bstruct\b|\benum class\b|enum/; //  btw im so acoustic i learned regex in a day
   let name=""  
+  
+    if(current_line.match(/using/)) return false;
     
     if(current_line.match(pattern) ){
       name = current_line; 
