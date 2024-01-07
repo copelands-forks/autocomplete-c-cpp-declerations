@@ -203,9 +203,7 @@ const optimalRead =  (): string => {
   let  current_line =  coreParser.file?.next_line()!;
   let namespace  = coreParser.namespace!;
   
-  if(coreParser.file.index == 220){
-    log('wtf');
-  }
+ 
   if(handle_OSDN(current_line, namespace)){
     return current_line;
   }

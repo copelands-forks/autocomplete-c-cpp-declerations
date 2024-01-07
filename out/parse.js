@@ -183,9 +183,6 @@ const optimalRead = () => {
     var _a, _b;
     let current_line = (_a = coreParser.file) === null || _a === void 0 ? void 0 : _a.next_line();
     let namespace = coreParser.namespace;
-    if (coreParser.file.index == 220) {
-        log('wtf');
-    }
     if (handle_OSDN(current_line, namespace)) {
         return current_line;
     }
