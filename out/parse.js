@@ -150,15 +150,25 @@ const Skip_Function_Code = () => {
         }
     }
 };
+const skip_refs = (line) => {
+    if (line.match(/using|typedef|#define/)) {
+        coreParser.file.traverse(1);
+        skip_refs(coreParser.file.relative_line(1));
+        return false;
+    }
+    else if (coreParser.file.relative_line(1).match(/using|typedef|#define/)) {
+        skip_refs(coreParser.file.relative_line(1));
+    }
+    return true;
+};
 const handle_OSDN = (current_line, osdn) => {
     let file = coreParser.file;
     // keep forgetting its a fucking array of lines, oh steve be more inclusive to autists working on your projects
     //let pattern = // /namespace {|namespace\s*{/ garbage...
     let pattern = /namespace|\bclass\b|\bstruct\b|\benum class\b|enum/; //  btw im so acoustic i learned regex in a day
     let name = "";
-    if (current_line.match(/using/))
-        return false;
-    if (current_line.match(/\bnamespace\b\s*\w*\s*=/))
+    skip_refs(current_line);
+    if (current_line.match(/\bnamespace\b\s*\w*|W*\s*=/))
         return false;
     if (current_line.match(pattern)) {
         name = current_line;
@@ -168,11 +178,12 @@ const handle_OSDN = (current_line, osdn) => {
     }
     else
         return;
-    let combine = new RegExp(`/^\s*\b${pattern}\b/`); // getting quite good yea
+    let combine = new RegExp(`/\s*\b${pattern}\b/`); // getting quite good yea
     name = name.replace(pattern, "");
+    name = name.replace(/:[^{]*/, "");
     name = name.replace(/{/, '');
     // let keyname  = name.split(' ')[1] + '::'; // really good baby
-    let keyname = name.replace(/^\s*|\s*$/g, "") + '::';
+    let keyname = name.replace(/\s*|\s*$/g, "") + '::';
     osdn.Names.push(keyname);
     osdn.encapsulated++;
     osdn.is_Nested = true;
@@ -194,6 +205,8 @@ const optimalRead = () => {
         // disable namespace as an addition to function snippets
         namespace.Names.pop();
         namespace.encapsulated--;
+        if (namespace.encapsulated == 0)
+            namespace.is_Nested = false;
         // ... 
     }
     else {
@@ -244,7 +257,7 @@ function parse(fileContent) {
             }
             if (lineIsMethodSignature(temp, bracketsCount)) {
                 temp = addNamespace(temp, namespace);
-                h.methods.push(formatMethodsignature(temp.split(';')[0], h.class));
+                h.methods.push(formatMethodsignature(temp.split(';')[0]));
             }
             if (lineIsClass(temp)) {
                 h.class = temp.split(' ')[1].trim();
