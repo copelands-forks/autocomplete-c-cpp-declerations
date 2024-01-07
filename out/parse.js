@@ -97,10 +97,29 @@ const Codepat = {
     exit_condition_lambda: /(\s}\s)|(\s};)/,
 };
 const patterns = {
-    enter_Function_KnR: /\){\s*/,
-    enter_Function_Allman: /\s*{/,
+    enter_Function_KnR: /\)\s*{/,
+    enter_Function_Allman: /^\s*{/,
     exit_function: /\s*}\s*/,
-    code: Codepat
+    code: Codepat,
+    defined_function: /\w+|\W+\s+\w+|\W+([^)]*\)(?!;))/
+};
+const isDefinedFunction = (current_line) => {
+    if (!current_line.match(patterns.defined_function))
+        return false;
+    let result = coreParser.file.relative_line(1).match(patterns.enter_Function_Allman);
+    if (current_line.match(patterns.enter_Function_KnR) || result) {
+        log(`Caught defined Function = ${current_line}`);
+        coreParser.function.ignore_implements += current_line.replace(/{/, " ").replace(/\s^/, "");
+        coreParser.function.encapsulated = -1;
+        coreParser.function.inside_code = true;
+        if (result)
+            coreParser.file.traverse(1);
+        else
+            coreParser.file.traverse(0);
+        return true;
+    }
+    else
+        return false;
 };
 const Skip_Function_Code = () => {
     let func = coreParser.function;
@@ -110,7 +129,7 @@ const Skip_Function_Code = () => {
         let line_current = line_next;
         //  inside conditions and lambda ignore them 
         if (line_current.match(patterns.code.enter_conditions_KnR) || line_next.match(patterns.code.enter_conditions_Allman)) {
-            log("entered lambda/condition");
+            //log("entered lambda/condition")
             func.encapsulated--;
             func.inside_code = true;
         }
@@ -118,12 +137,11 @@ const Skip_Function_Code = () => {
         else if (func.inside_code && line_current.match(patterns.code.exit_condition_lambda) ||
             line_current.match(patterns.exit_function)) {
             func.encapsulated++;
-            log("left lambda/condition");
+            //log("left lambda/condition")
         }
         if (func.encapsulated == 0) {
             func.inside_code = false;
-            file.next_line();
-            log("left function");
+            // log("left function")
         }
         else if (func.inside_code == true) {
             Skip_Function_Code();
@@ -137,6 +155,8 @@ const handle_OSDN = (current_line, osdn) => {
     let pattern = /namespace|\bclass\b|\bstruct\b|\benum class\b|enum/; //  btw im so acoustic i learned regex in a day
     let name = "";
     if (current_line.match(/using/))
+        return false;
+    if (current_line.match(/\bnamespace\b\s*\w*\s*=/))
         return false;
     if (current_line.match(pattern)) {
         name = current_line;
@@ -161,13 +181,13 @@ const optimalRead = () => {
     var _a, _b;
     let current_line = (_a = coreParser.file) === null || _a === void 0 ? void 0 : _a.next_line();
     let namespace = coreParser.namespace;
+    if (coreParser.file.index == 220) {
+        log('wtf');
+    }
     if (handle_OSDN(current_line, namespace)) {
         return current_line;
     }
-    else if (current_line.match(patterns.enter_Function_Allman) || (current_line === null || current_line === void 0 ? void 0 : current_line.match(patterns.enter_Function_KnR))) {
-        coreParser.function.ignore_implements += current_line.replace(/{/, " ").replace(/\s^/, "");
-        coreParser.function.encapsulated = -1;
-        coreParser.function.inside_code = true;
+    else if (isDefinedFunction(current_line)) {
         Skip_Function_Code();
         current_line = (_b = coreParser.file) === null || _b === void 0 ? void 0 : _b.current_line();
     }
@@ -203,7 +223,10 @@ function parse(fileContent) {
     while (!coreParser.file.reached_limit()) {
         temp = optimalRead(); // Serve Steve's magic tomato soup algorithm with my own algo built ontop of it.
         bracketsCount = coreParser.namespace.encapsulated; // magic soup please do your shit
-        if (lineIsComment(temp)) {
+        if (temp.match(/^\s*\/\//)) {
+            continue;
+        }
+        else if (lineIsComment(temp)) { // does this even work?
             commentBlock = temp.startsWith('/*') ? true : commentBlock;
         }
         if (commentBlock || lineIsComment(temp)) {
@@ -240,16 +263,16 @@ function parse(fileContent) {
                 }
             }
         }
-        let ignore = coreParser.function.ignore_implements.replace(/\s*([a-z]*::)*/g, "");
-        for (let i = 0; i < h.methods.length; i++) {
-            h.methods[i] = h.methods[i].replace(/,/g, "");
-            let method_string = h.methods[i];
-            method_string = method_string.replace(/\s*([a-z]*::)*/g, "");
-            if (ignore.match(method_string)) {
-                // @ts-ignore
-                h.methods.splice(i, 1);
-                i--;
-            }
+    }
+    let ignore = coreParser.function.ignore_implements.replace(/\s*([a-z]*::)*/g, "");
+    for (let i = 0; i < h.methods.length; i++) {
+        let method_string = h.methods[i];
+        method_string = method_string.replace(/\s*([a-z]*::)*/g, "");
+        let result = ignore.includes(method_string);
+        if (result) {
+            // @ts-ignore
+            h.methods.splice(i, 1);
+            i--;
         }
     }
     return h;
