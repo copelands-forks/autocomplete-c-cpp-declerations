@@ -2,7 +2,7 @@
 	"name": "autocomplete-c-cpp-declerations",
 	"displayName": "Autocomplete C/C++ declerations",
 	"description": "autocomplete-c-cpp-declerations use . to see the magic, visit github repo for more information!",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"engines": {
 		"vscode": "^1.43.0"
 	},
