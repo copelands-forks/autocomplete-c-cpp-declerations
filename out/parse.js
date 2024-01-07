@@ -84,7 +84,7 @@ class ObjCoreParser {
     }
 }
 var coreParser = new ObjCoreParser();
-const debug_log = true; // enable debug logs
+const debug_log = false; // enable debug logs
 const log = (Message) => {
     if (debug_log)
         console.log(Message);
@@ -130,8 +130,10 @@ const Skip_Function_Code = () => {
         //  inside conditions and lambda ignore them 
         if (line_current.match(patterns.code.enter_conditions_KnR) || line_next.match(patterns.code.enter_conditions_Allman)) {
             //log("entered lambda/condition")
-            func.encapsulated--;
-            func.inside_code = true;
+            if (!line_current.match(/=\s*{[^}]*/)) {
+                func.encapsulated--;
+                func.inside_code = true;
+            }
         }
         // exiting conditions|lambda|functions
         else if (func.inside_code && line_current.match(patterns.code.exit_condition_lambda) ||
@@ -162,7 +164,7 @@ const handle_OSDN = (current_line, osdn) => {
         name = current_line;
         let underline = file.relative_line(1);
         if (!current_line.match(/{/) && underline.match(/^\s*{/))
-            coreParser.file.traverse(2);
+            coreParser.file.traverse(1);
     }
     else
         return;
@@ -346,7 +348,7 @@ function addNamespace(line, namespace) {
     if (coreParser.namespace.is_Nested) {
         line = line.replace(/^\s*/, "");
         let format = line.split(' ');
-        let name = coreParser.namespace.Names.toString().replace(/,/, "");
+        let name = coreParser.namespace.Names.toString().replace(/,/g, "");
         result += format[0], result += ` ${name}`;
         let seperate = format.slice(1).join(' ');
         result += seperate;
