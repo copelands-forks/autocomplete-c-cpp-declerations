@@ -1,5 +1,11 @@
  ***Auto Complete Declerations! C/C++***
   
+  
+  ![](https://github.com/copelands-forks/autocomplete-c-cpp-declerations/img/sc.gif)
+
+  
+  
+  
   a fork of SteveveSevetS's project:
   
      the purpose of the fork was to expand the extension so that it is useful in large scale C++/C  projects as well as add my own things to it.

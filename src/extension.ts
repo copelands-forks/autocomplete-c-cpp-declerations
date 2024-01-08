@@ -1,7 +1,8 @@
-// @ts-nocheck
+// d@ts-nocheck
 import { ExtensionContext, commands, window, workspace, Position, ViewColumn, languages, CompletionItem, SnippetString, Uri, TextEditor, Range, TextEdit, DocumentHighlight } from 'vscode'; //import vscode classes and workspace
 import { header, parse, indent, fileIsMain } from './parse'; //import parse functions and class
 import { CompletionItemProvider, TextDocument,   CancellationToken,   CompletionList } from 'vscode';
+import * as fs from 'fs';
 //settings
 var indentStyle: string | undefined;
 var columnNumber: ViewColumn | undefined;
@@ -10,27 +11,49 @@ var headersFolder: string | undefined;
 var pathSeparationToken: string;
 
 function readSettings(): void {
-	indentStyle = workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
+  indentStyle = workspace.getConfiguration('autocomplete-c-cpp-files').get('indentStyle');
 	columnNumber = workspace.getConfiguration('autocomplete-c-cpp-files').get('columnNumber');
 	triggerChar = workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
 	headersFolder = workspace.getConfiguration('autocomplete-c-cpp-files').get('headersFolder');
 }
 
+class triggerMethod {
+  global?:boolean
+
+  noAdding?:boolean
+
+};
+  var tm :triggerMethod = new triggerMethod(); 
+
 function isTriggerCharValid(document: TextDocument, position: Position): boolean {
-  const lineText = document.lineAt(position.line).text;
+  let lineText = document.lineAt(position.line).text;
   const prefix = lineText.substring(0, position.character);
-  //const isValidContext = !prb|\.\w*$/); actually stupid
-  return /\.\s*/.test(lineText);
+  let result = /(\.|\..)\s*/.test(lineText);
+  tm.global = false;
+  
+  lineText = lineText.replace(/\s/g, "")
+    // cant you just do {0} like in c this language is ridiculous
+    if(lineText == '..') {
+      tm.global = true;
+    
+    }
+ 
+    
+  
+ 
+  return result; 
 }
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
+
+
+
 export async function activate(context: ExtensionContext) {
 	console.log('C/C++ autocomplete is running');
 	readSettings();
 	pathSeparationToken = process.platform == 'win32' ? '\\' : '/';
 	triggerChar = triggerChar ? triggerChar : '.';
-
 	const C_provider = languages.registerCompletionItemProvider('c', {
 		async provideCompletionItems(document, position) {
 		  if(isTriggerCharValid(document, position)){
@@ -123,10 +146,14 @@ function parsemainfile(): void {
 	}
 }
 
-function parseAndCreateCompletitions(fileContent: string, deleteRange: Range): CompletionItem[] {
+function parseAndCreateCompletitions(fileContent: string, deleteRange: Range, header_ref?:header): CompletionItem[] {
 	let h = new	header();
 	let completitions: CompletionItem[] = [];
 	h = parse(fileContent);
+	 
+
+	
+	
 	h.methods.forEach(el => {
 		let completition = new CompletionItem(el);
 		completition.additionalTextEdits = [TextEdit.delete(deleteRange)];
@@ -137,35 +164,73 @@ function parseAndCreateCompletitions(fileContent: string, deleteRange: Range): C
 		namespaceCompletition.additionalTextEdits = [TextEdit.delete(deleteRange)];
 		completitions.push(namespaceCompletition);
 	}
-return completitions;
+	
+	if(header_ref) { 
+	  // send back header so we deal with includes, they should also be completionated if thats a word
+	  header_ref.methods = h.methods;
+	  header_ref.includes = h.includes;
+
+	}
+  return completitions;
 }
 
 async function createCompletitions(editor: TextEditor | undefined, deleteRange: Range) : Promise<CompletionItem[]> {
 	readSettings();
-	let completitions: CompletionItem[] = [];
-	if(editor){
+  let completitions: CompletionItem[] = [];
+  if(!editor){
+      return completitions;
+  }
+ 
+  let wsfile = workspace.workspaceFile
+	const workSpace = {
+    self: workspace,
+    folder: workspace.workspaceFolders,
+    file: workspace.workspaceFile
+  };
+	    
+	let h:header = new header();    
+  
 		let doc = editor.document;
 		let lines = editor.document.getText();
+	
 		if(doc.fileName.endsWith('.c') || doc.fileName.endsWith('.hpp') || doc.fileName.endsWith('.h') || doc.fileName.endsWith('.cpp') || doc.fileName.endsWith('cc')){
-			if(true){
-				//create completitions
-				completitions = parseAndCreateCompletitions(lines, deleteRange);
-			} else {
-				//open the header file and create completitions
-				let pathToHeader: string | null = workspace.workspaceFolders ? workspace.workspaceFolders[0].uri.path : null;
-				if(headersFolder != null && pathToHeader != null){
-					let temp = doc.fileName.split(pathSeparationToken);
-					let headerFileName = temp[temp.length - 1].replace(/\.(c|cpp)$/, '.h');
-					pathToHeader += pathSeparationToken + headersFolder + pathSeparationToken + headerFileName;
-					let headerUri = Uri.file(pathToHeader);
-					let fileContent = await workspace.fs.readFile(headerUri);
-					completitions = parseAndCreateCompletitions(fileContent.toString(), deleteRange);
-				}
-			}
+      
+      // we prioritize the current file
+      if(tm.global){
+        deleteRange = new Range (
+          new Position(editor.selection.active.line, editor.selection.active.character - 2),   
+          editor.selection.active
+        );
+      }
+      
+      
+      completitions = parseAndCreateCompletitions(lines, deleteRange, h);
+      if(!tm.global ) return completitions;
+      
+      
+      let array_wfiles = await getAllWorkspaceFiles();
+      let wsfiles = array_wfiles;
+      
+      let hfiles = h.includes.toString().replace(/#\binclude\b\s*"/g,"");
+      for(var Path of wsfiles){
+        let path = Path.path.replace(/^(.*\/)([^/]+)$/, '$2');
+        if(!hfiles.includes(path)){
+          continue;
+        }
+        
+        
+        let fileContent = fs.readFileSync(Path.fsPath, 'utf8');
+        
+        completitions = completitions.concat(parseAndCreateCompletitions(fileContent, deleteRange, h));
+      }
 		}
-	}
-	 
+    
 	return completitions;
+}
+
+async function getAllWorkspaceFiles(): Promise<vscode.Uri[]> {
+  let files = await workspace.findFiles('**/*');
+  return files;
 }
 
 async function openImplementationFile(fileContent: string, fileLanguage: string): Promise<void> {

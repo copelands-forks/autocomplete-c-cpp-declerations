@@ -11,7 +11,7 @@ exports.fileIsMain = exports.indent = exports.parse = exports.header = void 0;
 // @ts-nocheck
 /**
   
-  * @field copelands -- fork implementations, aside from minor impls and changes i introduced the CoreParser
+  * @field copeland/s -- fork implementations, aside from minor impls and changes i introduced the CoreParser
     * I have never worked with anyone ever when coding so i might not know how to comment shit please be kind.
     * I dont like javascript and this is my first time ever working with typescript and it makes me rage.
             
@@ -130,7 +130,7 @@ const Skip_Function_Code = () => {
         //  inside conditions and lambda ignore them 
         if (line_current.match(patterns.code.enter_conditions_KnR) || line_next.match(patterns.code.enter_conditions_Allman)) {
             //log("entered lambda/condition")
-            if (!line_current.match(/=\s*{[^}]*/)) {
+            if (!line_current.match(/=\s*{[^}]*/) && !line_current.match(/{([^}]*)}(?!;)/)) {
                 func.encapsulated--;
                 func.inside_code = true;
             }
@@ -168,7 +168,7 @@ const handle_OSDN = (current_line, osdn) => {
     let pattern = /namespace|\bclass\b|\bstruct\b|\benum class\b|enum/; //  btw im so acoustic i learned regex in a day
     let name = "";
     skip_refs(current_line);
-    if (current_line.match(/\bnamespace\b\s*\w*|W*\s*=/))
+    if (current_line.match(/(\bnamespace\b\s*\w+|W+\s)*=/))
         return false;
     if (current_line.match(pattern)) {
         name = current_line;

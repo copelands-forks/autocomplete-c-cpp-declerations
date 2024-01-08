@@ -10,9 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
-// @ts-nocheck
+// d@ts-nocheck
 const vscode_1 = require("vscode"); //import vscode classes and workspace
 const parse_1 = require("./parse"); //import parse functions and class
+const fs = require("fs");
 //settings
 var indentStyle;
 var columnNumber;
@@ -25,11 +26,21 @@ function readSettings() {
     triggerChar = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('triggerChar');
     headersFolder = vscode_1.workspace.getConfiguration('autocomplete-c-cpp-files').get('headersFolder');
 }
+class triggerMethod {
+}
+;
+var tm = new triggerMethod();
 function isTriggerCharValid(document, position) {
-    const lineText = document.lineAt(position.line).text;
+    let lineText = document.lineAt(position.line).text;
     const prefix = lineText.substring(0, position.character);
-    //const isValidContext = !prb|\.\w*$/); actually stupid
-    return /\.\s*/.test(lineText);
+    let result = /(\.|\..)\s*/.test(lineText);
+    tm.global = false;
+    lineText = lineText.replace(/\s/g, "");
+    // cant you just do {0} like in c this language is ridiculous
+    if (lineText == '..') {
+        tm.global = true;
+    }
+    return result;
 }
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -125,7 +136,7 @@ function parsemainfile() {
         vscode_1.window.showWarningMessage('no open document, please open one and run the command again');
     }
 }
-function parseAndCreateCompletitions(fileContent, deleteRange) {
+function parseAndCreateCompletitions(fileContent, deleteRange, header_ref) {
     let h = new parse_1.header();
     let completitions = [];
     h = (0, parse_1.parse)(fileContent);
@@ -139,35 +150,56 @@ function parseAndCreateCompletitions(fileContent, deleteRange) {
         namespaceCompletition.additionalTextEdits = [vscode_1.TextEdit.delete(deleteRange)];
         completitions.push(namespaceCompletition);
     }
+    if (header_ref) {
+        // send back header so we deal with includes, they should also be completionated if thats a word
+        header_ref.methods = h.methods;
+        header_ref.includes = h.includes;
+    }
     return completitions;
 }
 function createCompletitions(editor, deleteRange) {
     return __awaiter(this, void 0, void 0, function* () {
         readSettings();
         let completitions = [];
-        if (editor) {
-            let doc = editor.document;
-            let lines = editor.document.getText();
-            if (doc.fileName.endsWith('.c') || doc.fileName.endsWith('.hpp') || doc.fileName.endsWith('.h') || doc.fileName.endsWith('.cpp') || doc.fileName.endsWith('cc')) {
-                if (true) {
-                    //create completitions
-                    completitions = parseAndCreateCompletitions(lines, deleteRange);
+        if (!editor) {
+            return completitions;
+        }
+        let wsfile = vscode_1.workspace.workspaceFile;
+        const workSpace = {
+            self: vscode_1.workspace,
+            folder: vscode_1.workspace.workspaceFolders,
+            file: vscode_1.workspace.workspaceFile
+        };
+        let h = new parse_1.header();
+        let doc = editor.document;
+        let lines = editor.document.getText();
+        if (doc.fileName.endsWith('.c') || doc.fileName.endsWith('.hpp') || doc.fileName.endsWith('.h') || doc.fileName.endsWith('.cpp') || doc.fileName.endsWith('cc')) {
+            // we prioritize the current file
+            if (tm.global) {
+                deleteRange = new vscode_1.Range(new vscode_1.Position(editor.selection.active.line, editor.selection.active.character - 2), editor.selection.active);
+            }
+            completitions = parseAndCreateCompletitions(lines, deleteRange, h);
+            if (!tm.global)
+                return completitions;
+            let array_wfiles = yield getAllWorkspaceFiles();
+            let wsfiles = array_wfiles;
+            let hfiles = h.includes.toString().replace(/#\binclude\b\s*"/g, "");
+            for (var Path of wsfiles) {
+                let path = Path.path.replace(/^(.*\/)([^/]+)$/, '$2');
+                if (!hfiles.includes(path)) {
+                    continue;
                 }
-                else {
-                    //open the header file and create completitions
-                    let pathToHeader = vscode_1.workspace.workspaceFolders ? vscode_1.workspace.workspaceFolders[0].uri.path : null;
-                    if (headersFolder != null && pathToHeader != null) {
-                        let temp = doc.fileName.split(pathSeparationToken);
-                        let headerFileName = temp[temp.length - 1].replace(/\.(c|cpp)$/, '.h');
-                        pathToHeader += pathSeparationToken + headersFolder + pathSeparationToken + headerFileName;
-                        let headerUri = vscode_1.Uri.file(pathToHeader);
-                        let fileContent = yield vscode_1.workspace.fs.readFile(headerUri);
-                        completitions = parseAndCreateCompletitions(fileContent.toString(), deleteRange);
-                    }
-                }
+                let fileContent = fs.readFileSync(Path.fsPath, 'utf8');
+                completitions = completitions.concat(parseAndCreateCompletitions(fileContent, deleteRange, h));
             }
         }
         return completitions;
+    });
+}
+function getAllWorkspaceFiles() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let files = yield vscode_1.workspace.findFiles('**/*');
+        return files;
     });
 }
 function openImplementationFile(fileContent, fileLanguage) {
