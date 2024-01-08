@@ -139,6 +139,10 @@ const Skip_Function_Code=():void =>  { // and it does exactly what it was made f
         func.encapsulated--; 
         func.inside_code=true;
       }
+      // if its deangled
+        if(line_current.match(/(}\s*else)(\s\w+)([^\)])*\)\s+{/)){
+            func.encapsulated++;
+        }
     }
     // exiting conditions|lambda|functions
     else if(func.inside_code  && line_current.match(patterns.code.exit_condition_lambda ) ||

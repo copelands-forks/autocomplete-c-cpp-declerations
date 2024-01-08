@@ -1,4 +1,4 @@
-// d@ts-nocheck
+// @ts-nocheck
 import { ExtensionContext, commands, window, workspace, Position, ViewColumn, languages, CompletionItem, SnippetString, Uri, TextEditor, Range, TextEdit, DocumentHighlight } from 'vscode'; //import vscode classes and workspace
 import { header, parse, indent, fileIsMain } from './parse'; //import parse functions and class
 import { CompletionItemProvider, TextDocument,   CancellationToken,   CompletionList } from 'vscode';

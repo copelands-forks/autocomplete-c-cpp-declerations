@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
-// d@ts-nocheck
+// @ts-nocheck
 const vscode_1 = require("vscode"); //import vscode classes and workspace
 const parse_1 = require("./parse"); //import parse functions and class
 const fs = require("fs");
