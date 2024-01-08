@@ -1,7 +1,7 @@
  ***Auto Complete Declerations! C/C++***
   
   
-  ![x](https://github.com/copelands-forks/autocomplete-c-cpp-declerations/img/sc.gif)
+  ![x](https://github.com/copelands-forks/autocomplete-c-cpp-declerations/blob/master/img/sc.gif)
 
   
   
