@@ -28,15 +28,17 @@ class triggerMethod {
 function isTriggerCharValid(document: TextDocument, position: Position): boolean {
   let lineText = document.lineAt(position.line).text;
   const prefix = lineText.substring(0, position.character);
-  let result = /(\.|\..)\s*/.test(lineText);
+  let result = false;
   tm.global = false;
   
   lineText = lineText.replace(/\s/g, "")
     // cant you just do {0} like in c this language is ridiculous
     if(lineText == '..') {
       tm.global = true;
-    
-    }
+      result = true;
+
+    } else if(lineText == '.') result = true;
+
  
     
   
@@ -190,16 +192,16 @@ async function createCompletitions(editor: TextEditor | undefined, deleteRange: 
 	    
 	let h:header = new header();    
   
-		let doc = editor.document;
-		let lines = editor.document.getText();
+  let doc = editor.document;
+  let lines = editor.document.getText();
 	
-		if(doc.fileName.endsWith('.c') || doc.fileName.endsWith('.hpp') || doc.fileName.endsWith('.h') || doc.fileName.endsWith('.cpp') || doc.fileName.endsWith('cc')){
-      
-      // we prioritize the current file
-      if(tm.global){
-        deleteRange = new Range (
-          new Position(editor.selection.active.line, editor.selection.active.character - 2),   
-          editor.selection.active
+  if(doc.fileName.endsWith('.c') || doc.fileName.endsWith('.hpp') || doc.fileName.endsWith('.h') || doc.fileName.endsWith('.cpp') || doc.fileName.endsWith('cc')){
+    
+    // we prioritize the current file
+    if(tm.global){
+      deleteRange = new Range (
+        new Position(editor.selection.active.line, editor.selection.active.character - 2),   
+        editor.selection.active
         );
       }
       
@@ -209,29 +211,41 @@ async function createCompletitions(editor: TextEditor | undefined, deleteRange: 
       
       
       let array_wfiles = await getAllWorkspaceFiles();
-      let wsfiles = array_wfiles;
+      let _wsfiles = array_wfiles;
       
-      let hfiles = h.includes.toString().replace(/#\binclude\b\s*"/g,"");
-      for(var Path of wsfiles){
-        let path = Path.path.replace(/^(.*\/)([^/]+)$/, '$2');
-        if(!hfiles.includes(path)){
-          continue;
-        }
+      const gatherAll_hfiles = (wsfiles : vscode.Uri[], current_header:header) => { 
         
-        
-        let fileContent = fs.readFileSync(Path.fsPath, 'utf8');
-        
-        completitions = completitions.concat(parseAndCreateCompletitions(fileContent, deleteRange, h));
+          for(var Path of wsfiles)
+          {
+            let path = Path.path.replace(/^(.*\/)([^/]+)$/, '$2');
+            let hfiles = current_header.includes.toString().replace(/#\binclude\b\s*"/g,"");
+            
+            if(!hfiles.includes(path)){
+              continue;
+            }
+              let fileContent = fs.readFileSync(Path.fsPath, 'utf8');
+              
+              let inner_headers:header = new header();    
+              completitions = completitions.concat(parseAndCreateCompletitions(fileContent, deleteRange, inner_headers));
+              if(inner_headers.includes.length > 0){
+                 gatherAll_hfiles(wsfiles, inner_headers);
+              }
+  
+          }
       }
+      
+      gatherAll_hfiles(_wsfiles, h);
+      
+        
 		}
     
-	return completitions;
-}
-
-async function getAllWorkspaceFiles(): Promise<vscode.Uri[]> {
-  let files = await workspace.findFiles('**/*');
-  return files;
-}
+    return completitions;
+  }
+  
+  async function getAllWorkspaceFiles(): Promise<vscode.Uri[]> {
+    let files = await workspace.findFiles('**/*');
+    return files;
+  }
 
 async function openImplementationFile(fileContent: string, fileLanguage: string): Promise<void> {
 	let doc = await workspace.openTextDocument({ language: fileLanguage, content: fileContent });

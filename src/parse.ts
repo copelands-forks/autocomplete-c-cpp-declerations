@@ -242,6 +242,9 @@ const optimalRead =  (): string => {
     
   } 
   
+  if(current_line.match(/#\binclude\b/))
+      current_line = current_line..replace(/^\s*/, "")
+  
   return current_line;
 }   
 

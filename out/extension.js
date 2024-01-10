@@ -33,13 +33,16 @@ var tm = new triggerMethod();
 function isTriggerCharValid(document, position) {
     let lineText = document.lineAt(position.line).text;
     const prefix = lineText.substring(0, position.character);
-    let result = /(\.|\..)\s*/.test(lineText);
+    let result = false;
     tm.global = false;
     lineText = lineText.replace(/\s/g, "");
     // cant you just do {0} like in c this language is ridiculous
     if (lineText == '..') {
         tm.global = true;
+        result = true;
     }
+    else if (lineText == '.')
+        result = true;
     return result;
 }
 // this method is called when your extension is activated
@@ -182,16 +185,23 @@ function createCompletitions(editor, deleteRange) {
             if (!tm.global)
                 return completitions;
             let array_wfiles = yield getAllWorkspaceFiles();
-            let wsfiles = array_wfiles;
-            let hfiles = h.includes.toString().replace(/#\binclude\b\s*"/g, "");
-            for (var Path of wsfiles) {
-                let path = Path.path.replace(/^(.*\/)([^/]+)$/, '$2');
-                if (!hfiles.includes(path)) {
-                    continue;
+            let _wsfiles = array_wfiles;
+            const gatherAll_hfiles = (wsfiles, current_header) => {
+                for (var Path of wsfiles) {
+                    let path = Path.path.replace(/^(.*\/)([^/]+)$/, '$2');
+                    let hfiles = current_header.includes.toString().replace(/#\binclude\b\s*"/g, "");
+                    if (!hfiles.includes(path)) {
+                        continue;
+                    }
+                    let fileContent = fs.readFileSync(Path.fsPath, 'utf8');
+                    let inner_headers = new parse_1.header();
+                    completitions = completitions.concat(parseAndCreateCompletitions(fileContent, deleteRange, inner_headers));
+                    if (inner_headers.includes.length > 0) {
+                        gatherAll_hfiles(wsfiles, inner_headers);
+                    }
                 }
-                let fileContent = fs.readFileSync(Path.fsPath, 'utf8');
-                completitions = completitions.concat(parseAndCreateCompletitions(fileContent, deleteRange, h));
-            }
+            };
+            gatherAll_hfiles(_wsfiles, h);
         }
         return completitions;
     });
