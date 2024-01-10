@@ -16,8 +16,8 @@
     Auto Completion suggestion Rework:
     
       ✔️ namespaces, structs, classes, enum classes and enums have been added!
-        ✔️ namespaces and data structures are now added onto method/function completions.
-        ✔️ global scope and inner header file searches, use '..' for global scope  
+      ✔️ namespaces and data structures are now added onto method/function completions.
+      ✔️ Global scope and inner header file searches, use '..' for global scope  
         
      Trigger key Auto Completion algorithm:
   
